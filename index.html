@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drive Music Player</title>
+  <!-- Inline favicon to avoid 404 and provide a simple icon -->
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14' font-size='14'>🎵</text></svg>">
   <style>
     * {
       margin: 0;
@@ -175,6 +177,44 @@
       transform: translateY(-2px);
     }
 
+    /* Shuffle button for folders */
+    .shuffle-btn {
+      background: rgba(102, 126, 234, 0.12);
+      border: 1px solid rgba(102, 126, 234, 0.18);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.15s ease;
+      flex: 0 0 auto;
+    }
+
+    .shuffle-btn:hover {
+      transform: translateY(-2px);
+      background: rgba(102, 126, 234, 0.18);
+    }
+
+    /* Right-side actions container inside .item */
+    .item-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Header-level shuffle button container placed above the grid */
+    .folder-shuffle-header {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+
     .item-icon {
       font-size: 24px;
       width: 40px;
@@ -184,6 +224,22 @@
       justify-content: center;
       background: rgba(102, 126, 234, 0.2);
       border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .item-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .album-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 6px;
     }
 
     .item-text {
@@ -228,6 +284,36 @@
       align-items: center;
       justify-content: center;
       font-size: 24px;
+      position: relative; /* allow spinner overlay */
+      overflow: hidden;
+    }
+
+    .album-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 6px;
+    }
+
+    .album-art .spinner {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 20px;
+      height: 20px;
+      margin-left: -10px;
+      margin-top: -10px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 5;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     .track-details {
@@ -382,11 +468,11 @@
       .grid {
         grid-template-columns: 1fr;
       }
-      
+
       .player-controls {
         flex-wrap: wrap;
       }
-      
+
       .volume-container {
         width: 100%;
         justify-content: center;
@@ -403,254 +489,656 @@
 
       .search-container {
         width: 100%;
-        order: 3;
-      }
-
-      .shuffle-btn {
-        order: 2;
-      }
-
-      .breadcrumb {
-        order: 1;
-        width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="logo">🎵 Drive Music</div>
-      <button class="login-btn" onclick="login()">Connect Google Drive</button>
-    </div>
+<div class="container">
+  <div class="header">
+    <div class="logo">🎵 Drive Music</div>
+    <button class="login-btn" onclick="login()">Connect Google Drive</button>
+  </div>
 
-    <div class="nav-bar">
-      <button class="back-btn" onclick="goBack()">
-        <span>←</span>
-        <span>Back</span>
-      </button>
-      <div class="breadcrumb">
-        <span class="breadcrumb-item" id="breadcrumb">Music Library</span>
-      </div>
-      <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Search music..." oninput="handleSearch(this.value)">
-        <span class="search-icon">🔍</span>
-      </div>
-    </div>
+  <div id="notif" role="status" aria-live="polite" style="display:none; margin-top:10px; padding:8px 12px; border-radius:8px; border:1px solid transparent; color:#e0e0e0; font-size:13px;"></div>
 
-    <div class="content-section" id="folders-section" style="display:none;">
-      <h2 class="section-title">Folders</h2>
-      <div class="grid" id="folders"></div>
+  <div class="nav-bar">
+    <button class="back-btn" onclick="goBack()">
+      <span>←</span>
+      <span>Back</span>
+    </button>
+    <div class="breadcrumb">
+      <span class="breadcrumb-item" id="breadcrumb">Music Library</span>
     </div>
-
-    <div class="content-section">
-      <h2 class="section-title">Content</h2>
-      <div class="grid" id="songs"></div>
+    <div class="search-container">
+      <input type="text" id="search-input" class="search-input" placeholder="Search music..." oninput="handleSearch(this.value)">
+      <span class="search-icon">🔍</span>
     </div>
   </div>
 
-  <div id="bottom-player">
-    <div class="player-container">
-      <div class="player-info">
-        <div class="album-art">🎵</div>
-        <div class="track-details">
-          <div class="track-title" id="track-title">No track playing</div>
-          <div class="track-artist">Select a song to begin</div>
-        </div>
+  <div class="content-section" id="folders-section" style="display:none;">
+    <h2 class="section-title">Folders</h2>
+    <div class="grid" id="folders"></div>
+  </div>
+
+  <div class="content-section">
+    <h2 class="section-title">Content</h2>
+    <div class="grid" id="songs"></div>
+  </div>
+</div>
+
+<div id="bottom-player">
+  <div class="player-container">
+    <div class="player-info">
+      <div class="album-art">🎵</div>
+      <div class="track-details">
+        <div class="track-title" id="track-title">No track playing</div>
+        <div class="track-artist">Select a song to begin</div>
       </div>
-      
-      <div class="player-controls">
-        <button class="control-btn">⏮</button>
-        <button class="control-btn play-btn" onclick="togglePlay()">▶</button>
-        <button class="control-btn">⏭</button>
-        
-        <div class="progress-container">
-          <span class="time-display" id="current-time">0:00</span>
-          <div class="progress-bar" onclick="seekByClick(event)">
-            <div class="progress-fill" id="progress-fill"></div>
-          </div>
-          <span class="time-display" id="total-time">0:00</span>
+    </div>
+
+    <div class="player-controls">
+      <button class="control-btn" onclick="playPrevious()">⏮</button>
+      <button class="control-btn play-btn" onclick="togglePlay()">▶</button>
+      <button class="control-btn" onclick="playNext()">⏭</button>
+
+      <div class="progress-container">
+        <span class="time-display" id="current-time">0:00</span>
+        <div class="progress-bar" onclick="seekByClick(event)">
+          <div class="progress-fill" id="progress-fill"></div>
         </div>
-        
-        <div class="volume-container">
-          <span class="control-btn" style="width:auto; padding:0 10px; cursor:default;">🔊</span>
-          <div class="volume-slider" onclick="setVolume(event)">
-            <div class="volume-fill" id="volume-fill"></div>
-          </div>
+        <span class="time-display" id="total-time">0:00</span>
+      </div>
+
+      <div class="volume-container">
+        <span class="control-btn" style="width:auto; padding:0 10px; cursor:default;">🔊</span>
+        <div class="volume-slider" onclick="setVolume(event)">
+          <div class="volume-fill" id="volume-fill"></div>
         </div>
       </div>
     </div>
-    <audio id="player"></audio>
   </div>
+  <audio id="player"></audio>
+</div>
 
-  <script>
-    /* ================= CONFIG ================= */
-    const CLIENT_ID = "986736634476-ph01g1mpr6f50c0oi3qb61u946dcmtcc.apps.googleusercontent.com";
-    const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
-    const ROOT_MUSIC_FOLDER_ID = "1h7LJQvQmHq_XjJwxCch8SXtsjR3qjgdD";
+<script>
+  /* ================= CONFIG ================= */
+  const CLIENT_ID = "986736634476-ph01g1mpr6f50c0oi3qb61u946dcmtcc.apps.googleusercontent.com";
+  const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
+  const ROOT_MUSIC_FOLDER_ID = "1h7LJQvQmHq_XjJwxCch8SXtsjR3qjgdD";
 
-    let accessToken = null;
-    let currentAudioUrl = null;
-    let folderStack = [];
-    let currentFolderId = ROOT_MUSIC_FOLDER_ID;
-    let allItems = []; // Store all items for search
-    let searchTimeout = null;
+  let accessToken = null;
+  let tokenClient = null;
+  let pendingTokenResolver = null;
+  let loginShouldLoadRoot = false;
+  let currentAudioUrl = null;
+  let folderStack = [];
+  let currentFolderId = ROOT_MUSIC_FOLDER_ID;
+  let allItems = []; // Store all items for search
+  let searchTimeout = null;
+  let currentPlaylist = []; // Songs in current folder
+  let currentTrackIndex = -1; // Current playing track index
+  // Streaming helpers to allow abort and MediaSource usage
+  let currentStreamController = null;
+  let currentMediaSource = null;
+  // Track album art blob URL so we can revoke it when replaced
+  let currentAlbumArtUrl = null;
 
-    /* ================= LOGIN ================= */
-    function login() {
-      const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: token => {
-          accessToken = token.access_token;
-          loadRootFolders();
+  /* ================= LOGIN ================= */
+  function login(shouldLoadRoot = true) {
+    // If GSI hasn't loaded yet, wait a short while and try again (improves UX on slow network)
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+      showMessage('Google Identity Services loading… will try shortly.', false, 3000);
+      const start = Date.now();
+      const wait = setInterval(() => {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+          clearInterval(wait);
+          login(shouldLoadRoot);
+        } else if (Date.now() - start > 10000) {
+          clearInterval(wait);
+          showMessage('Google Identity Services failed to load. Check network or try reloading the page.', true);
         }
-      });
-      tokenClient.requestAccessToken();
+      }, 500);
+      return;
     }
 
-    /* ================= ROOT FOLDERS ================= */
-    async function loadRootFolders() {
-      folderStack = [];
-      currentFolderId = ROOT_MUSIC_FOLDER_ID;
-      updateBreadcrumb();
-
-      const res = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q='${ROOT_MUSIC_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name)`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      const data = await res.json();
-
-      const folderList = document.getElementById("folders");
-      const songsList = document.getElementById("songs");
-      folderList.innerHTML = "";
-      songsList.innerHTML = "";
-
-      // Clear search when going to root
-      document.getElementById("search-input").value = "";
-      allItems = [];
-
-      if (data.files && data.files.length > 0) {
-        document.getElementById("folders-section").style.display = "block";
-        data.files.forEach((folder, i) => {
-          const div = document.createElement("div");
-          div.className = "item";
-          div.style.animationDelay = `${i * 0.05}s`;
-          div.innerHTML = `
-            <div class="item-icon">📁</div>
-            <div class="item-text">${folder.name}</div>
-          `;
-          div.onclick = () => loadFolder(folder.id, folder.name);
-          folderList.appendChild(div);
-        });
-      } else {
-        document.getElementById("folders-section").style.display = "none";
-      }
-    }
-
-    /* ================= LOAD ANY FOLDER ================= */
-    async function loadFolder(folderId, folderName = "", pushHistory = true) {
-      if (folderId === currentFolderId) return;
-
-      if (pushHistory) {
-        folderStack.push({ id: currentFolderId, name: folderName });
-      }
-      currentFolderId = folderId;
-      updateBreadcrumb();
-
-      const res = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType)`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      const data = await res.json();
-
-      // Store items for search
-      allItems = data.files || [];
-
-      const songsList = document.getElementById("songs");
-      songsList.innerHTML = "";
-      document.getElementById("folders-section").style.display = "none";
-
-      // Clear search when navigating
-      document.getElementById("search-input").value = "";
-
-      displayItems(allItems);
-    }
-
-    function displayItems(items) {
-      const songsList = document.getElementById("songs");
-      songsList.innerHTML = "";
-
-      if (items && items.length > 0) {
-        items.forEach((item, i) => {
-          const div = document.createElement("div");
-          div.className = "item";
-          div.style.animationDelay = `${i * 0.05}s`;
-          
-          if (item.mimeType === "application/vnd.google-apps.folder") {
-            div.innerHTML = `
-              <div class="item-icon">📁</div>
-              <div class="item-text">${item.name}</div>
-            `;
-            div.onclick = () => loadFolder(item.id, item.name);
-          } else if (item.mimeType.startsWith("audio/")) {
-            div.innerHTML = `
-              <div class="item-icon">🎵</div>
-              <div class="item-text">${item.name}</div>
-            `;
-            div.onclick = () => playSong(item.id, item.name);
-          }
-          songsList.appendChild(div);
-        });
-      } else {
-        songsList.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">🎵</div>
-            <div>No music files found</div>
-          </div>
-        `;
-      }
-    }
-
-    /* ================= PLAY MUSIC ================= */
-    async function playSong(fileId, fileName) {
+    if (!tokenClient) {
       try {
-        // Show loading state
-        document.getElementById("track-title").textContent = "Loading...";
-        
-        const res = await fetch(
-          `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-          { headers: { Authorization: `Bearer ${accessToken}` } }
-        );
-        
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: token => {
+            accessToken = token.access_token;
+            if (pendingTokenResolver) {
+              pendingTokenResolver(accessToken);
+              pendingTokenResolver = null;
+            }
+            if (loginShouldLoadRoot) {
+              loginShouldLoadRoot = false;
+              loadRootFolders();
+            }
+          }
+        });
+      } catch (e) {
+        showMessage('Failed to initialize Google Identity (check console).', true);
+        console.error(e);
+        return;
+      }
+    }
+    loginShouldLoadRoot = shouldLoadRoot;
+    try {
+      tokenClient.requestAccessToken({ prompt: '' });
+    } catch (e) {
+      showMessage('Failed to request access token.', true);
+      console.error(e);
+    }
+  }
+
+  // Get an access token, prompting if needed. Resolves to a token string or rejects on timeout/error.
+  function getAccessToken() {
+    return new Promise((resolve, reject) => {
+      if (accessToken) return resolve(accessToken);
+      if (!tokenClient) {
+        // Create token client on-demand and request a token (do not auto-load root by default)
+        login(false);
+      }
+      pendingTokenResolver = (token) => resolve(token);
+      // Trigger a token request which will resolve pendingTokenResolver via callback
+      tokenClient.requestAccessToken({ prompt: '' });
+      // Timeout in case something goes wrong with the token flow
+      setTimeout(() => {
+        if (pendingTokenResolver) {
+          pendingTokenResolver = null;
+          reject(new Error('Timed out getting access token'));
+        }
+      }, 15000);
+    });
+  }
+
+  // Wrapper for Google Drive requests that ensures a valid token and retries once on 401/403
+  async function driveFetch(url, options = {}) {
+    try {
+      await getAccessToken();
+      options.headers = options.headers || {};
+      options.headers['Authorization'] = `Bearer ${accessToken}`;
+
+      let res = await fetch(url, options);
+      if (res.status === 401 || res.status === 403) {
+        // Try refreshing token and retry once
+        accessToken = null;
+        try {
+          await getAccessToken();
+          options.headers['Authorization'] = `Bearer ${accessToken}`;
+          res = await fetch(url, options);
+        } catch (err) {
+          showMessage('Authentication required. Please sign in.', true);
+          throw err;
+        }
+      }
+
+      // If non-OK, show a message but return the response to callers for fine-grained handling
+      if (!res.ok) {
+        console.debug('driveFetch: non-OK response', { url, status: res.status, statusText: res.statusText });
+        showMessage(`Request failed: ${res.status} ${res.statusText}`, true);
+      }
+
+      return res;
+    } catch (err) {
+      showMessage(err.message || 'Network error', true);
+      throw err;
+    }
+  }
+
+  // Simple non-blocking notification UI helper
+  function showMessage(msg, isError = false, timeout = 5000) {
+    const el = document.getElementById('notif');
+    if (!el) {
+      console.log((isError ? 'ERROR: ' : '') + msg);
+      return;
+    }
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = isError ? 'rgba(255, 80, 80, 0.08)' : 'rgba(102, 126, 234, 0.06)';
+    el.style.borderColor = isError ? 'rgba(255, 80, 80, 0.16)' : 'rgba(102, 126, 234, 0.12)';
+    setTimeout(() => { el.style.display = 'none'; }, timeout);
+  }
+
+  // Set album art for current track. Tries the provided thumbnail URL, and falls back to fetching the image via driveFetch if direct load fails.
+  async function setAlbumArt(fileId, thumbnailLink) {
+    const el = document.querySelector('.album-art');
+    if (!el) return;
+    console.debug('setAlbumArt start', { fileId, thumbnailLink });
+
+    // Remove previous object URL if any
+    if (currentAlbumArtUrl) {
+      try { URL.revokeObjectURL(currentAlbumArtUrl); } catch (e) { /* ignore */ }
+      currentAlbumArtUrl = null;
+    }
+
+    // Show spinner and clear existing content
+    el.innerHTML = '';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    el.appendChild(spinner);
+
+    // Default to emoji while loading/fallback
+    let used = false;
+    if (!thumbnailLink) {
+      // No thumbnail available -> remove spinner and show default
+      spinner.remove();
+      el.textContent = '🎵';
+      console.debug('setAlbumArt: no thumbnailLink provided');
+      return;
+    }
+
+    // Try direct image load first (may fail due to CORS or auth)
+    try {
+      const img = new Image();
+      img.alt = 'Album art';
+      img.src = thumbnailLink;
+      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+      spinner.remove();
+      el.innerHTML = '';
+      el.appendChild(img);
+      used = true;
+      console.debug('setAlbumArt: direct load succeeded');
+    } catch (err) {
+      console.debug('setAlbumArt: direct load failed, trying auth fetch', err);
+      // Direct load failed; fall back to fetching via authorized connection
+      try {
+        const res = await driveFetch(thumbnailLink);
+        console.debug('setAlbumArt: driveFetch response', { status: res.status, ok: res.ok });
+        if (!res.ok) throw new Error('Thumbnail fetch failed');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        currentAlbumArtUrl = url;
+        const img = new Image();
+        img.alt = 'Album art';
+        img.src = url;
+        await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+        spinner.remove();
+        el.innerHTML = '';
+        el.appendChild(img);
+        used = true;
+        console.debug('setAlbumArt: auth fetch succeeded');
+      } catch (err2) {
+        console.warn('Failed to load thumbnail via auth fetch', err2);
+      }
+    }
+
+    if (!used) {
+      spinner.remove();
+      el.textContent = '🎵';
+      console.debug('setAlbumArt: using fallback emoji');
+    }
+  }
+
+  // Set the default bottom album art (simple emoji/icon) and clear any previous blob URL
+  function setDefaultAlbumArt() {
+    const el = document.querySelector('.album-art');
+    if (!el) return;
+    if (currentAlbumArtUrl) {
+      try { URL.revokeObjectURL(currentAlbumArtUrl); } catch (e) {}
+      currentAlbumArtUrl = null;
+    }
+    el.innerHTML = '🎵';
+  }
+
+  // Load an <img> element with a thumbnail URL. Tries direct load first and falls back to fetching via driveFetch (auth) if needed.
+  async function loadThumbnailImage(imgEl, thumbnailUrl) {
+    if (!imgEl || !thumbnailUrl) return;
+    console.debug('loadThumbnailImage start', { thumbnailUrl, imgEl });
+    return new Promise(async (resolve) => {
+      let revokedUrl = null;
+      const cleanup = () => {
+        imgEl.onload = null; imgEl.onerror = null;
+        if (revokedUrl) {
+          try { URL.revokeObjectURL(revokedUrl); } catch (e) {}
+          revokedUrl = null;
+        }
+        resolve();
+      };
+
+      imgEl.onload = () => {
+        console.debug('loadThumbnailImage: direct load succeeded', { thumbnailUrl });
+        cleanup();
+      };
+      imgEl.onerror = async (ev) => {
+        console.debug('loadThumbnailImage: direct load failed, will try auth fetch', { thumbnailUrl, error: ev });
+        // Try fetching via authorized endpoint (driveFetch)
+        try {
+          const res = await driveFetch(thumbnailUrl);
+          console.debug('loadThumbnailImage: driveFetch response', { status: res.status, ok: res.ok });
+          if (!res.ok) return cleanup();
+          const blob = await res.blob();
+          revokedUrl = URL.createObjectURL(blob);
+          imgEl.src = revokedUrl;
+          // Wait for onload/onerror to resolve
+        } catch (e) {
+          console.debug('loadThumbnailImage: auth fetch failed', e);
+          cleanup();
+        }
+      };
+
+      // Kick off: try direct set first
+      try { imgEl.src = thumbnailUrl; } catch (e) { imgEl.onerror && imgEl.onerror(e); }
+    });
+  }
+
+  // Fetch a byte range using Drive and return buffer + headers; logs timing and response for diagnostics
+  async function fetchRange(url, start, end, signal) {
+    const options = { headers: { Range: `bytes=${start}-${end}` } };
+    if (signal) options.signal = signal;
+    const t0 = performance.now();
+    const res = await driveFetch(url, options);
+    const buffer = await res.arrayBuffer();
+    const t1 = performance.now();
+    const cr = res.headers.get('Content-Range');
+    console.debug('fetchRange', { url, start, end, status: res.status, contentRange: cr, elapsedMs: (t1 - t0) });
+    return { buffer, contentRange: cr, status: res.status, elapsed: (t1 - t0) };
+  }
+
+  // Append ArrayBuffer to SourceBuffer and wait for updateend
+  function appendBufferSafe(sourceBuffer, arrayBuffer) {
+    return new Promise((resolve, reject) => {
+      const onUpdate = () => { sourceBuffer.removeEventListener('updateend', onUpdate); resolve(); };
+      sourceBuffer.addEventListener('updateend', onUpdate);
+      try {
+        sourceBuffer.appendBuffer(arrayBuffer);
+      } catch (err) {
+        sourceBuffer.removeEventListener('updateend', onUpdate);
+        reject(err);
+      }
+    });
+  }
+
+  /* ================= ROOT FOLDERS ================= */
+  async function loadRootFolders() {
+    folderStack = [];
+    currentFolderId = ROOT_MUSIC_FOLDER_ID;
+    updateBreadcrumb();
+
+    const res = await driveFetch(
+      `https://www.googleapis.com/drive/v3/files?q='${ROOT_MUSIC_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name,thumbnailLink,iconLink)`
+    );
+    const data = await res.json();
+
+    const folderList = document.getElementById("folders");
+    const songsList = document.getElementById("songs");
+    folderList.innerHTML = "";
+    songsList.innerHTML = "";
+    // Remove any folder-level header shuffle that might exist
+    const parent = songsList.parentNode;
+    const existingHeader = parent.querySelector('.folder-shuffle-header');
+    if (existingHeader) existingHeader.remove();
+
+    // Clear search when going to root
+    document.getElementById("search-input").value = "";
+    allItems = [];
+
+    if (data.files && data.files.length > 0) {
+      document.getElementById("folders-section").style.display = "block";
+      data.files.forEach((folder, i) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.style.animationDelay = `${i * 0.05}s`;
+
+        const iconWrapper = document.createElement('div');
+        iconWrapper.className = 'item-icon';
+        const textDiv = document.createElement('div');
+        textDiv.className = 'item-text';
+        textDiv.textContent = folder.name;
+
+        const thumbCandidate = folder.thumbnailLink || folder.iconLink;
+        if (thumbCandidate) {
+          const img = document.createElement('img');
+          img.alt = folder.name;
+          loadThumbnailImage(img, thumbCandidate).catch(()=>{});
+          iconWrapper.appendChild(img);
+        } else {
+          iconWrapper.textContent = '📁';
+        }
+
+        div.appendChild(iconWrapper);
+        div.appendChild(textDiv);
+
+        // Add per-folder shuffle button that doesn't trigger the folder click
+        const shuffleBtn = document.createElement('button');
+        shuffleBtn.className = 'shuffle-btn';
+        shuffleBtn.title = 'Shuffle this folder';
+        shuffleBtn.textContent = '🔀';
+        shuffleBtn.onclick = (e) => { e.stopPropagation(); shuffleFolder(folder.id, folder.name); };
+        const actions = document.createElement('div');
+        actions.className = 'item-actions';
+        actions.appendChild(shuffleBtn);
+        div.appendChild(actions);
+
+        div.onclick = () => loadFolder(folder.id, folder.name);
+        folderList.appendChild(div);
+      });
+    } else {
+      document.getElementById("folders-section").style.display = "none";
+    }
+  }
+
+  /* ================= LOAD ANY FOLDER ================= */
+  async function loadFolder(folderId, folderName = "", pushHistory = true) {
+    if (folderId === currentFolderId) return;
+
+    if (pushHistory) {
+      folderStack.push({ id: currentFolderId, name: folderName });
+    }
+    currentFolderId = folderId;
+    updateBreadcrumb();
+
+    const res = await driveFetch(
+      `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,thumbnailLink,iconLink)`
+    );
+    const data = await res.json();
+
+    // Store items for search
+    allItems = data.files || [];
+
+    // Build playlist from audio files only
+    currentPlaylist = allItems.filter(item => item.mimeType.startsWith("audio/"));
+
+    const songsList = document.getElementById("songs");
+    songsList.innerHTML = "";
+    document.getElementById("folders-section").style.display = "none";
+
+    // Clear search when navigating
+    document.getElementById("search-input").value = "";
+
+    displayItems(allItems);
+
+    // Add a header-level shuffle button for this folder view (if any audio files present)
+    const songsContainer = document.getElementById('songs');
+    const parent = songsContainer.parentNode;
+    // Remove existing header if any (avoid duplicates)
+    const existingHeader = parent.querySelector('.folder-shuffle-header');
+    if (existingHeader) existingHeader.remove();
+    if (currentPlaylist && currentPlaylist.length > 0) {
+      const headerShuffle = document.createElement('div');
+      headerShuffle.className = 'folder-shuffle-header';
+      const headerBtn = document.createElement('button');
+      headerBtn.className = 'shuffle-btn';
+      headerBtn.title = 'Shuffle songs in this folder';
+      headerBtn.textContent = '🔀';
+      headerBtn.onclick = () => shuffleCurrentFolder();
+      headerShuffle.appendChild(headerBtn);
+      parent.insertBefore(headerShuffle, songsContainer);
+    }
+  }
+
+  function displayItems(items) {
+    const songsList = document.getElementById("songs");
+    songsList.innerHTML = "";
+
+    if (items && items.length > 0) {
+      items.forEach((item, i) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.style.animationDelay = `${i * 0.05}s`;
+
+        // Build icon area and text
+        const iconWrapper = document.createElement('div');
+        iconWrapper.className = 'item-icon';
+        const textDiv = document.createElement('div');
+        textDiv.className = 'item-text';
+        textDiv.textContent = item.name;
+
+        // For audio files, always show the default music icon; no thumbnails in the list
+        if (item.mimeType && item.mimeType.startsWith('audio/')) {
+          iconWrapper.textContent = '🎵';
+        } else {
+          // For folders and other types, show thumbnail/icon if available, else fallback
+          const thumbCandidate = item.thumbnailLink || item.iconLink;
+          if (thumbCandidate) {
+            const img = document.createElement('img');
+            img.alt = item.name;
+            loadThumbnailImage(img, thumbCandidate).catch(() => {});
+            iconWrapper.appendChild(img);
+          } else {
+            iconWrapper.textContent = item.mimeType === 'application/vnd.google-apps.folder' ? '📁' : '🎵';
+          }
+        }
+
+        div.appendChild(iconWrapper);
+        div.appendChild(textDiv);
+
+        // If this is a folder, add a small shuffle button and folder click handler
+        if (item.mimeType === "application/vnd.google-apps.folder") {
+          const shuffleBtn = document.createElement('button');
+          shuffleBtn.className = 'shuffle-btn';
+          shuffleBtn.title = 'Shuffle this folder';
+          shuffleBtn.textContent = '🔀';
+          shuffleBtn.onclick = (e) => { e.stopPropagation(); shuffleFolder(item.id, item.name); };
+          const actions = document.createElement('div');
+          actions.className = 'item-actions';
+          actions.appendChild(shuffleBtn);
+          div.appendChild(actions);
+
+          div.onclick = () => loadFolder(item.id, item.name);
+        } else if (item.mimeType && item.mimeType.startsWith("audio/")) {
+          div.onclick = () => playSong(item.id, item.name);
+        }
+
+        songsList.appendChild(div);
+      });
+    } else {
+      songsList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🎵</div>
+          <div>No music files found</div>
+        </div>
+      `;
+    }
+  }
+
+  // Shuffle helper (Fisher-Yates)
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  // Shuffle a folder by fetching its audio files, randomizing order, and starting playback
+  async function shuffleFolder(folderId, folderName = '') {
+    try {
+      showMessage(`Shuffling "${folderName || 'folder'}"...`, false, 2000);
+      const res = await driveFetch(
+        `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,thumbnailLink,iconLink)`
+      );
+      const data = await res.json();
+      const songs = (data.files || []).filter(f => f.mimeType && f.mimeType.startsWith('audio/'));
+      if (songs.length === 0) {
+        showMessage('No songs found in this folder', true);
+        return;
+      }
+      shuffleArray(songs);
+      currentPlaylist = songs;
+      currentTrackIndex = 0;
+      playSong(currentPlaylist[0].id, currentPlaylist[0].name);
+    } catch (e) {
+      console.error('shuffleFolder failed', e);
+      showMessage('Failed to shuffle folder', true);
+    }
+  }
+
+  // Shuffle the currently-loaded folder playlist (no network fetch required)
+  function shuffleCurrentFolder() {
+    if (!currentPlaylist || currentPlaylist.length === 0) {
+      showMessage('No songs to shuffle in this folder', true);
+      return;
+    }
+    shuffleArray(currentPlaylist);
+    currentTrackIndex = 0;
+    playSong(currentPlaylist[0].id, currentPlaylist[0].name);
+  }
+
+  /* ================= PLAY MUSIC ================= */
+  async function playSong(fileId, fileName) {
+    try {
+      // Show loading state early so user sees feedback
+      document.getElementById("track-title").textContent = "Loading...";
+
+      // Find and set current track index and mime type if available
+      currentTrackIndex = currentPlaylist.findIndex(song => song.id === fileId);
+      const songItem = currentPlaylist[currentTrackIndex] || allItems.find(s => s.id === fileId) || {};
+      const mimeType = songItem.mimeType || 'audio/mpeg';
+      const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+      // Use default album art for the bottom player for songs (do not show thumbnails)
+      setDefaultAlbumArt();
+
+
+      // Abort any previous streaming download
+      if (currentStreamController) {
+        try { currentStreamController.abort(); } catch (e) { /* ignore */ }
+        currentStreamController = null;
+      }
+      // Clean up previous media source or object URL
+      if (currentAudioUrl) {
+        try { URL.revokeObjectURL(currentAudioUrl); } catch (e) { /* ignore */ }
+        currentAudioUrl = null;
+      }
+      if (currentMediaSource) {
+        try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
+        currentMediaSource = null;
+      }
+
+      const player = document.getElementById("player");
+
+      // Helper fallback to download full blob if streaming not supported or fails
+      const streamFallback = async () => {
+        const res = await driveFetch(url);
         if (!res.ok) {
           throw new Error(`Failed to fetch audio: ${res.status}`);
         }
-        
         const blob = await res.blob();
         console.log("Blob type:", blob.type, "Size:", blob.size);
 
         if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
         currentAudioUrl = URL.createObjectURL(blob);
-
-        const player = document.getElementById("player");
         player.src = currentAudioUrl;
-        
+
         // Update UI
         document.getElementById("track-title").textContent = fileName;
         document.querySelector(".play-btn").textContent = "⏸";
-        
+        // Use default album art for audio files in the bottom player
+        setDefaultAlbumArt();
+
         // Add event listeners
         player.ontimeupdate = updateProgress;
         player.onended = () => {
           document.querySelector(".play-btn").textContent = "▶";
+          playNext();
         };
         player.onerror = (e) => {
           console.error("Audio playback error:", e);
           document.getElementById("track-title").textContent = "Error playing: " + fileName;
         };
-        
-        // Attempt to play
+
         const playPromise = player.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
@@ -658,120 +1146,297 @@
             document.querySelector(".play-btn").textContent = "▶";
           });
         }
-      } catch (error) {
-        console.error("Error loading song:", error);
-        document.getElementById("track-title").textContent = "Failed to load: " + fileName;
-      }
-    }
+      };
 
-    /* ================= PLAYER CONTROLS ================= */
-    function togglePlay() {
-      const player = document.getElementById("player");
-      const btn = document.querySelector(".play-btn");
-      
-      if (player.paused) {
-        player.play();
-        btn.textContent = "⏸";
-      } else {
-        player.pause();
-        btn.textContent = "▶";
-      }
-    }
+      // Try streaming via MediaSource for faster startup, fallback to full download when not available
+      try {
+        if (window.MediaSource) {
+          let msType = mimeType;
+          // Try common codec hint for mp3 if necessary
+          if (!MediaSource.isTypeSupported(msType) && mimeType === 'audio/mpeg' && MediaSource.isTypeSupported('audio/mpeg; codecs="mp3"')) {
+            msType = 'audio/mpeg; codecs="mp3"';
+          }
 
-    function updateProgress() {
-      const player = document.getElementById("player");
-      const fill = document.getElementById("progress-fill");
-      const currentTime = document.getElementById("current-time");
-      const totalTime = document.getElementById("total-time");
+          if (MediaSource.isTypeSupported(msType)) {
+            currentMediaSource = new MediaSource();
+            player.src = URL.createObjectURL(currentMediaSource);
+            currentStreamController = new AbortController();
+            const signal = currentStreamController.signal;
 
-      if (!player.duration) return;
+            currentMediaSource.addEventListener('sourceopen', async function onOpen() {
+              currentMediaSource.removeEventListener('sourceopen', onOpen);
+              let sourceBuffer;
+              try {
+                sourceBuffer = currentMediaSource.addSourceBuffer(msType);
+              } catch (e) {
+                console.warn('SourceBuffer creation failed, falling back', e);
+                await streamFallback();
+                return;
+              }
 
-      const percent = (player.currentTime / player.duration) * 100;
-      fill.style.width = percent + "%";
+              try {
+                // Range-based streaming: request a small initial chunk to start playback quickly,
+                // then fetch subsequent ranges and append them to the SourceBuffer.
+                const INITIAL_CHUNK = 128 * 1024; // 128KB initial chunk
+                const CHUNK_SIZE = 256 * 1024; // 256KB per subsequent chunk
 
-      currentTime.textContent = formatTime(player.currentTime);
-      totalTime.textContent = formatTime(player.duration);
-    }
+                // Fetch initial range (diagnostics enabled)
+                const tFetchStart = performance.now();
+                const initial = await fetchRange(url, 0, INITIAL_CHUNK - 1, signal);
+                const tFetchEnd = performance.now();
+                console.debug('initialFetch', { fileId, start: 0, end: INITIAL_CHUNK - 1, status: initial.status, contentRange: initial.contentRange, fetchMs: initial.elapsed || (tFetchEnd - tFetchStart) });
 
-    function seekByClick(e) {
-      const player = document.getElementById("player");
-      if (!player.duration) return;
+                // If server returned full file (status 200), treat as blob fallback
+                if (initial.status === 200) {
+                  console.debug('Initial range returned full file (200) - using blob fallback', { size: initial.buffer.byteLength });
+                  const blob = new Blob([initial.buffer], { type: mimeType });
+                  if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
+                  currentAudioUrl = URL.createObjectURL(blob);
+                  player.src = currentAudioUrl;
 
-      const bar = e.currentTarget;
-      const rect = bar.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      player.currentTime = percent * player.duration;
-    }
+                  // Update UI and handlers (similar to fallback)
+                  document.getElementById("track-title").textContent = fileName;
+                  document.querySelector(".play-btn").textContent = "⏸";
+                  player.ontimeupdate = updateProgress;
+                  player.onended = () => { document.querySelector(".play-btn").textContent = "▶"; playNext(); };
+                  player.onerror = (e) => { console.error("Audio playback error:", e); document.getElementById("track-title").textContent = "Error playing: " + fileName; };
 
-    function setVolume(e) {
-      const player = document.getElementById("player");
-      const slider = e.currentTarget;
-      const fill = document.getElementById("volume-fill");
-      const rect = slider.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      
-      player.volume = Math.max(0, Math.min(1, percent));
-      fill.style.width = (percent * 100) + "%";
-    }
+                  const playPromise = player.play();
+                  if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                      console.error("Play failed:", error);
+                      document.querySelector(".play-btn").textContent = "▶";
+                    });
+                  }
+                  return;
+                }
 
-    function formatTime(seconds) {
-      if (isNaN(seconds)) return "0:00";
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
+                // Append initial chunk to buffer and measure append time
+                const tAppendStart = performance.now();
+                await appendBufferSafe(sourceBuffer, initial.buffer);
+                const tAppendEnd = performance.now();
+                console.debug('appendInitial', { appendMs: (tAppendEnd - tAppendStart), readyState: player.readyState, bufferedLength: player.buffered ? player.buffered.length : 0 });
 
-    /* ================= SEARCH ================= */
-    function handleSearch(query) {
-      // Debounce search
-      clearTimeout(searchTimeout);
-      
-      searchTimeout = setTimeout(() => {
-        const searchTerm = query.toLowerCase().trim();
-        
-        if (searchTerm === "") {
-          // Show all items if search is empty
-          displayItems(allItems);
-          return;
+                // Start playback as soon as we have enough buffer; measure time to 'playing'
+                if (player.paused && player.readyState >= 2) {
+                  const onPlaying = () => {
+                    console.debug('player playing', { sinceFetchMs: performance.now() - tFetchStart, readyState: player.readyState });
+                    player.removeEventListener('playing', onPlaying);
+                  };
+                  player.addEventListener('playing', onPlaying);
+                  try { await player.play(); document.querySelector('.play-btn').textContent = '⏸'; } catch (e) { console.error('Play failed after initial chunk', e); player.removeEventListener('playing', onPlaying); }
+                }
+
+                // Determine total size if available from Content-Range header (format: bytes start-end/total)
+                let totalBytes = null;
+                if (initial.contentRange) {
+                  const m = initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
+                  if (m) {
+                    totalBytes = m[3] === '*' ? null : parseInt(m[3], 10);
+                  }
+                }
+
+                // Continue fetching remaining ranges sequentially
+                let position = (initial.contentRange && initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/) ? (parseInt(initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/)[2], 10) + 1) : INITIAL_CHUNK);
+
+                while (true) {
+                  if (signal && signal.aborted) break;
+                  const end = position + CHUNK_SIZE - 1;
+                  const chunk = await fetchRange(url, position, end, signal);
+                  await appendBufferSafe(sourceBuffer, chunk.buffer);
+
+                  // If we received a small chunk or the content-range indicates we reached the end, stop
+                  if (chunk.status === 200) break;
+                  const cr = chunk.contentRange;
+                  if (cr) {
+                    const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
+                    if (m) {
+                      const chunkEnd = parseInt(m[2], 10);
+                      const total = m[3] === '*' ? null : parseInt(m[3], 10);
+                      position = chunkEnd + 1;
+                      if (total !== null && position > total) break;
+                    } else {
+                      // no match, advance by buffer length
+                      position += chunk.buffer.byteLength;
+                    }
+                  } else {
+                    // no content-range header, stop if buffer smaller than requested size
+                    if (chunk.buffer.byteLength < CHUNK_SIZE) break;
+                    position += chunk.buffer.byteLength;
+                  }
+                }
+
+                try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
+              } catch (err) {
+                if (err.name === 'AbortError') return; // aborted intentionally
+                console.error('Streaming failed', err);
+                showMessage('Streaming failed, falling back', true);
+                await streamFallback();
+              }
+
+                // Update UI right away
+                document.getElementById("track-title").textContent = fileName;
+                document.querySelector(".play-btn").textContent = "⏸";
+                // Use default album art for audio files in the bottom player
+                setDefaultAlbumArt();
+
+                // Set handlers for end/error
+                player.ontimeupdate = updateProgress;
+                player.onended = () => { document.querySelector(".play-btn").textContent = "▶"; playNext(); };
+                player.onerror = (e) => { console.error("Audio playback error:", e); document.getElementById("track-title").textContent = "Error playing: " + fileName; };
+            });
+
+            // Done setting up streaming path — return so fallback download is not started in parallel
+            return;
+          }
         }
-        
-        // Filter items by name
-        const filteredItems = allItems.filter(item => 
-          item.name.toLowerCase().includes(searchTerm)
-        );
-        
-        displayItems(filteredItems);
-      }, 300); // Wait 300ms after user stops typing
-    }
-
-    /* ================= NAVIGATION ================= */
-    function goBack() {
-      if (folderStack.length === 0) return;
-
-      const prev = folderStack.pop();
-      currentFolderId = prev.id;
-      updateBreadcrumb();
-
-      if (currentFolderId === ROOT_MUSIC_FOLDER_ID) {
-        loadRootFolders();
-      } else {
-        loadFolder(currentFolderId, "", false);
+      } catch (err) {
+        console.warn('MediaSource streaming not available or failed:', err);
       }
-    }
 
-    function updateBreadcrumb() {
-      const crumb = document.getElementById("breadcrumb");
-      if (folderStack.length === 0) {
-        crumb.textContent = "Music Library";
+      // If streaming wasn't used or failed, fallback to full download
+      await streamFallback();
+    } catch (error) {
+      console.error("Error loading song:", error);
+      document.getElementById("track-title").textContent = "Failed to load: " + fileName;
+      showMessage(error.message || 'Failed to load track', true);
+    }
+  }
+
+  /* ================= PLAYER CONTROLS ================= */
+  function togglePlay() {
+    const player = document.getElementById("player");
+    const btn = document.querySelector(".play-btn");
+
+    if (player.paused) {
+      player.play();
+      btn.textContent = "⏸";
+    } else {
+      player.pause();
+      btn.textContent = "▶";
+    }
+  }
+
+  function playNext() {
+    if (currentPlaylist.length === 0) return;
+
+    // Move to next track, loop back to start if at end
+    currentTrackIndex = (currentTrackIndex + 1) % currentPlaylist.length;
+    const nextSong = currentPlaylist[currentTrackIndex];
+    playSong(nextSong.id, nextSong.name);
+  }
+
+  function playPrevious() {
+    if (currentPlaylist.length === 0) return;
+
+    // Move to previous track, loop to end if at start
+    currentTrackIndex = (currentTrackIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+    const prevSong = currentPlaylist[currentTrackIndex];
+    playSong(prevSong.id, prevSong.name);
+  }
+
+  function updateProgress() {
+    const player = document.getElementById("player");
+    const fill = document.getElementById("progress-fill");
+    const currentTime = document.getElementById("current-time");
+    const totalTime = document.getElementById("total-time");
+
+    if (!player.duration) return;
+
+    const percent = (player.currentTime / player.duration) * 100;
+    fill.style.width = percent + "%";
+
+    currentTime.textContent = formatTime(player.currentTime);
+    totalTime.textContent = formatTime(player.duration);
+  }
+
+  function seekByClick(e) {
+    const player = document.getElementById("player");
+    if (!player.duration) return;
+
+    const bar = e.currentTarget;
+    const rect = bar.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    player.currentTime = percent * player.duration;
+  }
+
+  function setVolume(e) {
+    const player = document.getElementById("player");
+    const slider = e.currentTarget;
+    const fill = document.getElementById("volume-fill");
+    const rect = slider.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+
+    player.volume = Math.max(0, Math.min(1, percent));
+    fill.style.width = (percent * 100) + "%";
+  }
+
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  /* ================= SEARCH ================= */
+  function handleSearch(query) {
+    // Debounce search
+    clearTimeout(searchTimeout);
+
+    searchTimeout = setTimeout(() => {
+      const searchTerm = query.toLowerCase().trim();
+
+      if (searchTerm === "") {
+        // Show all items if search is empty
+        displayItems(allItems);
         return;
       }
-      crumb.textContent = ["Music Library", ...folderStack.map(f => f.name)].join(" › ");
+
+      // Filter items by name
+      const filteredItems = allItems.filter(item =>
+        item.name.toLowerCase().includes(searchTerm)
+      );
+
+      displayItems(filteredItems);
+    }, 300); // Wait 300ms after user stops typing
+  }
+
+  /* ================= NAVIGATION ================= */
+  function goBack() {
+    if (folderStack.length === 0) return;
+
+    const prev = folderStack.pop();
+
+    // If returning to root, load root folders; otherwise load previous folder without pushing history
+    if (prev.id === ROOT_MUSIC_FOLDER_ID) {
+      loadRootFolders();
+    } else {
+      loadFolder(prev.id, prev.name, false);
     }
 
-    // Initialize volume
-    document.getElementById("player").volume = 1;
-  </script>
+    updateBreadcrumb();
+  }
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  function updateBreadcrumb() {
+    const crumb = document.getElementById("breadcrumb");
+    if (folderStack.length === 0) {
+      crumb.textContent = "Music Library";
+      return;
+    }
+    crumb.textContent = ["Music Library", ...folderStack.map(f => f.name)].join(" › ");
+  }
+
+  // Expose handlers to the global scope so inline onclick works reliably
+  window.login = login;
+  window.goBack = goBack;
+  window.playSong = playSong;
+  window.shuffleFolder = shuffleFolder;
+  window.shuffleCurrentFolder = shuffleCurrentFolder;
+
+  // Initialize volume
+  document.getElementById("player").volume = 1;
+</script>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
