@@ -36,8 +36,8 @@ function setDefaultAlbumArt() {
     // Premium SVG Audio Icon
     const audioIconSvg = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
-        <circle cx="24" cy="24" r="20" fill="#2d3436"/>
-        <path d="M20,14v16.1c-0.8-0.6-1.9-1-3-1c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5V20h8v-6H20z" fill="#a29bfe"/>
+        <circle cx="24" cy="24" r="20" fill="#262626"/>
+        <path d="M20,14v16.1c-0.8-0.6-1.9-1-3-1c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5V20h8v-6H20z" fill="#FFB300"/>
       </svg>
     `;
 
@@ -184,8 +184,8 @@ function showMessage(msg, isError = false, timeout = 5000) {
     }
     el.textContent = msg;
     el.style.display = 'block';
-    el.style.background = isError ? 'rgba(255, 80, 80, 0.08)' : 'rgba(102, 126, 234, 0.06)';
-    el.style.borderColor = isError ? 'rgba(255, 80, 80, 0.16)' : 'rgba(102, 126, 234, 0.12)';
+    el.style.background = isError ? 'rgba(255, 80, 80, 0.08)' : 'rgba(255, 179, 0, 0.06)';
+    el.style.borderColor = isError ? 'rgba(255, 80, 80, 0.16)' : 'rgba(255, 179, 0, 0.12)';
     setTimeout(() => { el.style.display = 'none'; }, timeout);
 }
 
@@ -556,12 +556,12 @@ async function loadRootFolders() {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
               <defs>
                 <linearGradient id="folderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style="stop-color:#7e9dfa;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#5a7ce0;stop-opacity:1" />
+                  <stop offset="0%" style="stop-color:#FFB74D;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#FF9800;stop-opacity:1" />
                 </linearGradient>
                 <linearGradient id="folderBackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style="stop-color:#9eb5fc;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#7e9dfa;stop-opacity:1" />
+                  <stop offset="0%" style="stop-color:#FFE082;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#FFB74D;stop-opacity:1" />
                 </linearGradient>
               </defs>
               <path d="M40,12H22l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="url(#folderBackGrad)"/>
@@ -691,12 +691,12 @@ function displayItems(items) {
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
               <defs>
                 <linearGradient id="folderGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style="stop-color:#7e9dfa;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#5a7ce0;stop-opacity:1" />
+                  <stop offset="0%" style="stop-color:#FFB74D;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#FF9800;stop-opacity:1" />
                 </linearGradient>
                 <linearGradient id="folderBackGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style="stop-color:#9eb5fc;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#7e9dfa;stop-opacity:1" />
+                  <stop offset="0%" style="stop-color:#FFE082;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#FFB74D;stop-opacity:1" />
                 </linearGradient>
               </defs>
               <path d="M40,12H22l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="url(#folderBackGrad2)"/>
@@ -706,8 +706,8 @@ function displayItems(items) {
 
             const audioIconSvg = `
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
-              <circle cx="24" cy="24" r="20" fill="#2d3436"/>
-              <path d="M20,14v16.1c-0.8-0.6-1.9-1-3-1c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5V20h8v-6H20z" fill="#a29bfe"/>
+              <circle cx="24" cy="24" r="20" fill="#262626"/>
+              <path d="M20,14v16.1c-0.8-0.6-1.9-1-3-1c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5V20h8v-6H20z" fill="#FFB300"/>
             </svg>
           `;
 
@@ -804,8 +804,8 @@ function toggleShuffleMode() {
 
         // Update UI
         if (btn) {
-            btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            btn.style.boxShadow = '0 0 12px rgba(102, 126, 234, 0.6)';
+            btn.style.background = 'linear-gradient(135deg, #FFCA28 0%, #FF6F00 100%)';
+            btn.style.boxShadow = '0 0 12px rgba(255, 111, 0, 0.6)';
         }
 
     } else {
