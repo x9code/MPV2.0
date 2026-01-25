@@ -67,23 +67,18 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .back-btn {
-        padding: 8px 16px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #e0e0e0;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    .breadcrumb-link {
+        color: #888;
+        transition: color 0.2s;
     }
 
-    .back-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.2);
+    .breadcrumb-link:hover {
+        color: #FFB300;
+    }
+
+    .breadcrumb-link.root {
+        font-weight: 600;
+        color: #e0e0e0;
     }
 
     .breadcrumb {

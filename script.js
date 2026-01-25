@@ -86,6 +86,10 @@ function login(shouldLoadRoot = true) {
                         tokenExpiry = Date.now() + 3500 * 1000; // Default assumption if missing
                     }
 
+                    // Saving to local storage for persistence
+                    localStorage.setItem('gdrive_token', accessToken);
+                    localStorage.setItem('gdrive_expiry', tokenExpiry);
+
                     if (pendingTokenResolver) {
                         pendingTokenResolver(accessToken);
                         pendingTokenResolver = null;
@@ -1331,4 +1335,33 @@ document.getElementById("player").volume = 1;
         console.warn('mp4box failed to load from all CDNs — falling back to simple concat method');
         try { showMessage('Warning: mp4box failed to load; some files may not stream correctly.', true, 8000); } catch (e) { }
     })();
+})();
+
+// Auto-Login Check
+(function attemptAutoLogin() {
+    const storedToken = localStorage.getItem('gdrive_token');
+    const storedExpiry = localStorage.getItem('gdrive_expiry');
+
+    if (storedToken && storedExpiry) {
+        if (Date.now() < parseInt(storedExpiry)) {
+            console.debug('Restoring valid session from localStorage');
+            accessToken = storedToken;
+            tokenExpiry = parseInt(storedExpiry);
+
+            // Update UI
+            const loginBtn = document.getElementById('login-btn');
+            if (loginBtn) {
+                loginBtn.textContent = "Connected";
+                loginBtn.style.opacity = "0.8";
+                loginBtn.style.cursor = "default";
+            }
+
+            // Initial Load
+            loadRootFolders();
+        } else {
+            console.debug('Stored session expired');
+            localStorage.removeItem('gdrive_token');
+            localStorage.removeItem('gdrive_expiry');
+        }
+    }
 })();
