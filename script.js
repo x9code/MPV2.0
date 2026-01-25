@@ -1242,16 +1242,52 @@ function goBack() {
 
 function updateBreadcrumb() {
     const crumb = document.getElementById("breadcrumb");
-    if (folderStack.length === 0) {
-        crumb.textContent = "Music Library";
-        return;
-    }
-    crumb.textContent = ["Music Library", ...folderStack.map(f => f.name)].join(" › ");
+    crumb.innerHTML = "";
+
+    // Root
+    const rootSpan = document.createElement("span");
+    rootSpan.textContent = "Music Library";
+    rootSpan.className = "breadcrumb-link root";
+    rootSpan.onclick = () => loadRootFolders();
+    crumb.appendChild(rootSpan);
+
+    // Stack
+    folderStack.forEach((folder, index) => {
+        const sep = document.createTextNode(" › ");
+        crumb.appendChild(sep);
+
+        const span = document.createElement("span");
+        span.textContent = " " + folder.name + " "; // Add spacing
+        span.className = "breadcrumb-link";
+
+        // If last item, it's current. No click or simple reload.
+        if (index === folderStack.length - 1) {
+            span.style.fontWeight = "bold";
+            span.style.cursor = "default";
+        } else {
+            span.style.cursor = "pointer";
+            span.style.textDecoration = "underline";
+            span.onclick = () => {
+                // Logic to go back to this folder
+                const targetId = folderStack[index + 1].id;
+                const targetName = folder.name;
+
+                // Truncate stack to keep 0..index
+                folderStack = folderStack.slice(0, index + 1);
+
+                // Load without pushing
+                loadFolder(targetId, targetName, false);
+                updateBreadcrumb();
+            };
+        }
+        crumb.appendChild(span);
+    });
 }
 
 // Expose handlers to the global scope
 window.login = login;
 window.goBack = goBack;
+window.updateBreadcrumb = updateBreadcrumb;
 window.playSong = playSong;
 window.shuffleFolder = shuffleFolder;
 window.shuffleCurrentFolder = shuffleCurrentFolder;
