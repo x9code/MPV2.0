@@ -260,8 +260,8 @@
         transform: translateX(-50%);
         width: 95%;
         max-width: 800px;
-        background: rgba(30, 30, 45, 0.85);
-        /* Slightly lighter/bluer dark base */
+        background: rgba(0, 0, 0, 0.9);
+        /* Pure black base to match theme */
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -333,6 +333,27 @@
         width: 100%;
     }
 
+    /* Override standard shuffle-btn styles when inside the player to behave like a normal control button */
+    .player-controls .shuffle-btn {
+        background: transparent;
+        box-shadow: none;
+        color: rgba(255, 255, 255, 0.7);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+    }
+    
+    .player-controls .shuffle-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .player-controls .shuffle-btn svg {
+        fill: currentColor;
+    }
+
     /* Control grouping */
     .controls-main {
         display: flex;
@@ -349,6 +370,15 @@
         border-radius: 50%;
         /* Circles are more modern than rounded rects for generic buttons */
         font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .control-btn svg {
+        fill: currentColor;
+        width: 24px;
+        height: 24px;
     }
 
     .control-btn:hover {

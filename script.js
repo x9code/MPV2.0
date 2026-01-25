@@ -94,6 +94,13 @@ function login(shouldLoadRoot = true) {
                         loginShouldLoadRoot = false;
                         loadRootFolders();
                     }
+                    // Update button state
+                    const loginBtn = document.getElementById('login-btn');
+                    if (loginBtn) {
+                        loginBtn.textContent = "Connected";
+                        loginBtn.style.opacity = "0.8";
+                        loginBtn.style.cursor = "default";
+                    }
                 }
             });
         } catch (e) {
@@ -999,7 +1006,9 @@ async function playSong(fileId, fileName) {
     try {
         // 1. Immediate UI Feedback
         document.getElementById("track-title").textContent = "Loading " + fileName + "...";
-        document.querySelector(".play-btn").textContent = "⏸";
+        // icon: Pause (optimistic)
+        const playIcon = document.querySelector("#play-icon-svg path");
+        if (playIcon) playIcon.setAttribute("d", "M6 19h4V5H6v14zm8-14v14h4V5h-4z");
 
         // Find track index
         currentTrackIndex = currentPlaylist.findIndex(song => song.id === fileId);
@@ -1040,7 +1049,9 @@ async function playSong(fileId, fileName) {
     } catch (err) {
         console.error("Error loading song:", err);
         document.getElementById("track-title").textContent = "Failed to load: " + fileName;
-        document.querySelector(".play-btn").textContent = "▶";
+        // icon: Play
+        const playIcon = document.querySelector("#play-icon-svg path");
+        if (playIcon) playIcon.setAttribute("d", "M8 5v14l11-7z");
     }
 
     function finalizePlaybackSetup() {
@@ -1053,7 +1064,9 @@ async function playSong(fileId, fileName) {
         setDefaultAlbumArt();
         player.ontimeupdate = updateProgress;
         player.onended = () => {
-            document.querySelector(".play-btn").textContent = "▶";
+            // icon: Play
+            const playIcon = document.querySelector("#play-icon-svg path");
+            if (playIcon) playIcon.setAttribute("d", "M8 5v14l11-7z");
             playNext();
         };
         player.onerror = (e) => {
@@ -1064,7 +1077,9 @@ async function playSong(fileId, fileName) {
         if (playPromise !== undefined) {
             playPromise.catch(error => {
                 console.warn("Play auto-start prevented or failed:", error);
-                document.querySelector(".play-btn").textContent = "▶";
+                // icon: Play
+                const playIcon = document.querySelector("#play-icon-svg path");
+                if (playIcon) playIcon.setAttribute("d", "M8 5v14l11-7z");
             });
         }
     }
@@ -1089,7 +1104,9 @@ async function playSong(fileId, fileName) {
         } catch (e) {
             console.error('Full download failed', e);
             document.getElementById("track-title").textContent = "Error: " + e.message;
-            document.querySelector(".play-btn").textContent = "▶";
+            // icon: Play
+            const playIcon = document.querySelector("#play-icon-svg path");
+            if (playIcon) playIcon.setAttribute("d", "M8 5v14l11-7z");
         }
     }
 }
@@ -1097,14 +1114,16 @@ async function playSong(fileId, fileName) {
 /* ================= PLAYER CONTROLS ================= */
 function togglePlay() {
     const player = document.getElementById("player");
-    const btn = document.querySelector(".play-btn");
+    const playIcon = document.querySelector("#play-icon-svg path");
 
     if (player.paused) {
         player.play();
-        btn.textContent = "⏸";
+        // icon: Pause
+        if (playIcon) playIcon.setAttribute("d", "M6 19h4V5H6v14zm8-14v14h4V5h-4z");
     } else {
         player.pause();
-        btn.textContent = "▶";
+        // icon: Play
+        if (playIcon) playIcon.setAttribute("d", "M8 5v14l11-7z");
     }
 }
 
