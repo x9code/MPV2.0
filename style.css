@@ -260,16 +260,16 @@
         transform: translateX(-50%);
         width: 95%;
         max-width: 800px;
-        background: rgba(0, 0, 0, 0.9);
-        /* Pure black base to match theme */
+        background: rgba(18, 14, 8, 0.95);
+        /* Warm dark base for Amber theme */
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 179, 0, 0.2);
         border-radius: 20px;
         padding: 16px 24px;
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.4),
-            0 2px 8px rgba(0, 0, 0, 0.2);
+            0 0 15px rgba(255, 179, 0, 0.1);
         z-index: 1000;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
@@ -573,10 +573,10 @@
             transform: translateX(-50%);
             border-radius: 16px;
             padding: 12px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(10, 10, 10, 0.95);
-            /* Dark background */
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 179, 0, 0.25);
+            background: rgba(18, 14, 8, 0.98);
+            /* Dark warm background */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 179, 0, 0.15);
         }
 
         #bottom-player:hover {
