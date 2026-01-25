@@ -503,18 +503,23 @@
         /* Header & Nav */
         .header {
             padding: 15px 0;
-            flex-direction: column;
-            gap: 15px;
-            align-items: flex-start;
+            flex-direction: row;
+            /* Keep row layout */
+            justify-content: space-between;
+            align-items: center;
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 20px;
+            /* Slightly smaller for mobile row */
         }
 
         .login-btn {
-            width: 100%;
-            text-align: center;
+            width: auto;
+            /* Reset full width */
+            padding: 8px 16px;
+            /* Smaller padding */
+            font-size: 13px;
         }
 
         .nav-bar {
