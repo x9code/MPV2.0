@@ -1060,11 +1060,21 @@ async function playSong(fileId, fileName) {
 
     function finalizePlaybackSetup() {
         let displayTitle = fileName.replace(/\.[^/.]+$/, "");
+        let displayArtist = "Unknown Artist";
+
         if (displayTitle.includes('-')) {
             const parts = displayTitle.split('-');
-            if (parts.length > 0) displayTitle = parts[0].trim();
+            if (parts.length > 0) {
+                displayTitle = parts[0].trim();
+                // If there's a second part, assume it's the artist
+                if (parts.length > 1) {
+                    displayArtist = parts[1].trim();
+                }
+            }
         }
         document.getElementById("track-title").textContent = displayTitle;
+        const artistEl = document.querySelector(".track-artist");
+        if (artistEl) artistEl.textContent = displayArtist;
         setDefaultAlbumArt();
         player.ontimeupdate = updateProgress;
         player.onended = () => {
