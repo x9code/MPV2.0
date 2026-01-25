@@ -342,14 +342,14 @@
         height: 36px;
         border-radius: 50%;
     }
-    
+
     .player-controls .shuffle-btn:hover {
         background: rgba(255, 255, 255, 0.1);
         color: #fff;
         transform: none;
         box-shadow: none;
     }
-    
+
     .player-controls .shuffle-btn svg {
         fill: currentColor;
     }
@@ -565,41 +565,40 @@
             line-height: 1.4;
         }
 
-        /* Mobile Player Card */
+        /* Mobile Player Card - Floating Design */
         #bottom-player {
-            width: 100%;
-            bottom: 0;
-            left: 0;
-            transform: none;
-            border-radius: 24px 24px 0 0;
-            padding: 16px 20px 30px 20px;
-            /* Bottom padding for home bar */
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(20, 20, 25, 0.98);
-            /* Less transparent for clarity */
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+            width: 95%;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 16px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(10, 10, 10, 0.95);
+            /* Dark background */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
 
         #bottom-player:hover {
-            transform: none;
+            transform: translateX(-50%);
         }
 
         .player-container {
-            gap: 12px;
+            gap: 10px;
         }
 
         .player-info {
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
+            /* Tighter spacing */
         }
 
         .track-title {
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .track-artist {
-            font-size: 13px;
+            font-size: 12px;
         }
 
         /* Reposition Controls */
@@ -607,40 +606,55 @@
             flex-wrap: wrap;
             justify-content: space-between;
             gap: 0;
-            /* Let wrapping handle spacing */
+            padding: 0 4px;
         }
 
-        /* Progress Bar to Top of Controls */
+        /* Progress Bar */
         .progress-container {
             order: -1;
             width: 100%;
             display: flex;
-            /* Ensure visible */
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             padding: 0;
+            gap: 8px;
+        }
+
+        /* Show times on mobile but smaller */
+        .time-display {
+            font-size: 10px;
+            min-width: 30px;
         }
 
         .progress-bar {
-            height: 6px;
-            /* Easier to see */
+            height: 4px;
             background: rgba(255, 255, 255, 0.15);
         }
 
-        /* Buttons Row */
+        /* Compact Buttons */
         .control-btn {
-            width: 48px;
-            height: 48px;
-            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
             order: 2;
         }
 
+        .control-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
         .play-btn {
-            width: 56px;
-            height: 56px;
-            font-size: 24px;
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
             background: #fff;
             color: #000;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.25);
+            box-shadow: 0 2px 10px rgba(255, 255, 255, 0.15);
+        }
+
+        .play-btn svg {
+            width: 24px;
+            height: 24px;
         }
 
         /* Hide Volume */
