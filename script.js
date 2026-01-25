@@ -683,7 +683,18 @@ function displayItems(items) {
             iconWrapper.className = 'item-icon';
             const textDiv = document.createElement('div');
             textDiv.className = 'item-text';
-            textDiv.textContent = item.name;
+
+            // Clean filename: remove extension and artist info if present
+            let displayName = item.name.replace(/\.[^/.]+$/, ""); // remove extension
+            // Heuristic context: User screenshot shows "Song Name - Artist" format.
+            // We want to keep only "Song Name".
+            if (item.mimeType.startsWith('audio/') && displayName.includes('-')) {
+                const parts = displayName.split('-');
+                if (parts.length > 0) {
+                    displayName = parts[0].trim();
+                }
+            }
+            textDiv.textContent = displayName;
 
 
             // Custom SVG definitions
@@ -1033,7 +1044,12 @@ async function playSong(fileId, fileName) {
     }
 
     function finalizePlaybackSetup() {
-        document.getElementById("track-title").textContent = fileName;
+        let displayTitle = fileName.replace(/\.[^/.]+$/, "");
+        if (displayTitle.includes('-')) {
+            const parts = displayTitle.split('-');
+            if (parts.length > 0) displayTitle = parts[0].trim();
+        }
+        document.getElementById("track-title").textContent = displayTitle;
         setDefaultAlbumArt();
         player.ontimeupdate = updateProgress;
         player.onended = () => {
