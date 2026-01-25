@@ -775,8 +775,8 @@
           <span class="time-display" id="total-time">0:00</span>
         </div>
 
-        <button class="control-btn shuffle-btn" title="Shuffle current folder" onclick="shuffleCurrentFolder()"
-          aria-label="Shuffle current folder">
+        <button id="player-shuffle-btn" class="control-btn shuffle-btn" title="Toggle Shuffle"
+          onclick="toggleShuffleMode()" aria-label="Toggle Shuffle">
           <svg viewBox="0 0 24 24">
             <path
               d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
@@ -794,6 +794,7 @@
     const ROOT_MUSIC_FOLDER_ID = "1h7LJQvQmHq_XjJwxCch8SXtsjR3qjgdD";
 
     let accessToken = null;
+    let tokenExpiry = 0; // Timestamp when token expires
     let tokenClient = null;
     let pendingTokenResolver = null;
     let loginShouldLoadRoot = false;
@@ -803,6 +804,8 @@
     let allItems = []; // Store all items for search
     let searchTimeout = null;
     let currentPlaylist = []; // Songs in current folder
+    let originalPlaylist = []; // Unshuffled order for restoring
+    let isShuffleOn = false; // Toggle state
     let currentTrackIndex = -1; // Current playing track index
     // Streaming helpers to allow abort and MediaSource usage
     let currentStreamController = null;
@@ -865,6 +868,14 @@
             scope: SCOPES,
             callback: token => {
               accessToken = token.access_token;
+              // Store expiry time (minus 5 minutes buffer for safety)
+              if (token.expires_in) {
+                tokenExpiry = Date.now() + (token.expires_in * 1000) - (5 * 60 * 1000);
+                console.debug('Token refreshed. Expires in:', token.expires_in, 'seconds');
+              } else {
+                tokenExpiry = Date.now() + 3500 * 1000; // Default assumption if missing
+              }
+
               if (pendingTokenResolver) {
                 pendingTokenResolver(accessToken);
                 pendingTokenResolver = null;
@@ -893,14 +904,23 @@
     // Get an access token, prompting if needed. Resolves to a token string or rejects on timeout/error.
     function getAccessToken() {
       return new Promise((resolve, reject) => {
-        if (accessToken) return resolve(accessToken);
+        // Return valid token if not expired
+        if (accessToken && Date.now() < tokenExpiry) return resolve(accessToken);
+
+        if (accessToken) console.debug('Token expired or expiring soon, refreshing...');
+
         if (!tokenClient) {
           // Create token client on-demand and request a token (do not auto-load root by default)
           login(false);
         }
+
+        // If we already have a pending resolver, we might append to it? simpler to just overwrite or queue.
+        // For simplicity, overwrite current listener or assume sequential calls.
         pendingTokenResolver = (token) => resolve(token);
+
         // Trigger a token request which will resolve pendingTokenResolver via callback
-        tokenClient.requestAccessToken({ prompt: '' });
+        if (tokenClient) tokenClient.requestAccessToken({ prompt: '' });
+
         // Timeout in case something goes wrong with the token flow
         setTimeout(() => {
           if (pendingTokenResolver) {
@@ -946,6 +966,31 @@
     }
 
     // Simple non-blocking notification UI helper
+
+    // Helper to fetch a specific byte range (requires valid access token)
+    async function fetchRange(url, start, end, signal) {
+      try {
+        const headers = { 'Range': `bytes=${start}-${end}` };
+        // driveFetch automatically adds Authorization header
+        const res = await driveFetch(url, { headers, signal });
+        if (!res.ok) {
+          // 416 means range not satisfiable (e.g. file smaller than requested chunk)
+          if (res.status === 416) return { status: 416, buffer: new ArrayBuffer(0), contentRange: res.headers.get('Content-Range') };
+          throw new Error(`fetchRange failed: ${res.status}`);
+        }
+        const buffer = await res.arrayBuffer();
+        return {
+          buffer,
+          status: res.status,
+          contentRange: res.headers.get('Content-Range'),
+          total: res.headers.get('Content-Range') ? parseInt(res.headers.get('Content-Range').split('/')[1]) : null
+        };
+      } catch (e) {
+        if (signal && signal.aborted) throw e;
+        console.error('fetchRange error', e);
+        throw e;
+      }
+    }
     function showMessage(msg, isError = false, timeout = 5000) {
       const el = document.getElementById('notif');
       if (!el) {
@@ -1367,6 +1412,11 @@
 
       // Build playlist from audio files only
       currentPlaylist = allItems.filter(item => item.mimeType.startsWith("audio/"));
+      originalPlaylist = [...currentPlaylist];
+
+      if (isShuffleOn && currentPlaylist.length > 0) {
+        shuffleArray(currentPlaylist);
+      }
 
       const songsList = document.getElementById("songs");
       songsList.innerHTML = "";
@@ -1394,7 +1444,15 @@
             <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
           </svg>
         `;
-        headerBtn.onclick = () => shuffleCurrentFolder();
+        headerBtn.onclick = () => {
+          if (!isShuffleOn) toggleShuffleMode();
+          if (currentPlaylist.length > 0) {
+            // Always start playing a random song when 'Shuffle Folder' is clicked from the top
+            const randIndex = Math.floor(Math.random() * currentPlaylist.length);
+            const track = currentPlaylist[randIndex];
+            playSong(track.id, track.name);
+          }
+        };
         headerShuffle.appendChild(headerBtn);
         parent.insertBefore(headerShuffle, songsContainer);
       }
@@ -1408,7 +1466,7 @@
         items.forEach((item, i) => {
           const div = document.createElement("div");
           div.className = "item";
-          div.style.animationDelay = `${i * 0.05}s`;
+          div.style.animationDelay = `${i * 0.05} s`;
 
           // Build icon area and text
           const iconWrapper = document.createElement('div');
@@ -1420,7 +1478,7 @@
 
           // Custom SVG definitions
           const folderIconSvg = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+          < svg xmlns = "http://www.w3.org/2000/svg" viewBox = "0 0 48 48" width = "100%" height = "100%" >
               <defs>
                 <linearGradient id="folderGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" style="stop-color:#7e9dfa;stop-opacity:1" />
@@ -1433,14 +1491,14 @@
               </defs>
               <path d="M40,12H22l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="url(#folderBackGrad2)"/>
               <path d="M40,15H8c-2.2-0.1-4,1.8-4,4v17c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V19C44,16.8,42.2,15,40,15z" fill="url(#folderGrad2)"/>
-            </svg>
+            </svg >
           `;
 
           const audioIconSvg = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+          < svg xmlns = "http://www.w3.org/2000/svg" viewBox = "0 0 48 48" width = "100%" height = "100%" >
               <circle cx="24" cy="24" r="20" fill="#2d3436"/>
               <path d="M20,14v16.1c-0.8-0.6-1.9-1-3-1c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5V20h8v-6H20z" fill="#a29bfe"/>
-            </svg>
+            </svg >
           `;
 
           // Handle icons based on type
@@ -1474,10 +1532,10 @@
             shuffleBtn.title = 'Shuffle this folder';
             // Simple flat Shuffle SVG
             shuffleBtn.innerHTML = `
-              <svg viewBox="0 0 24 24">
-                <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
-              </svg>
-            `;
+          < svg viewBox = "0 0 24 24" >
+            <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
+              </svg >
+          `;
             shuffleBtn.onclick = (e) => { e.stopPropagation(); shuffleFolder(item.id, item.name); };
             const actions = document.createElement('div');
             actions.className = 'item-actions';
@@ -1493,11 +1551,78 @@
         });
       } else {
         songsList.innerHTML = `
-        <div class="empty-state">
+          < div class="empty-state" >
           <div class="empty-state-icon">🎵</div>
           <div>No music files found</div>
-        </div>
-      `;
+        </div >
+          `;
+      }
+    }
+
+    // Toggle Shuffle Mode (On/Off)
+    function toggleShuffleMode() {
+      const btn = document.getElementById('player-shuffle-btn');
+
+      if (!isShuffleOn) {
+        // Turn ON
+        if (currentPlaylist.length === 0) return;
+
+        isShuffleOn = true;
+        showMessage('Shuffle On', false, 1500);
+
+        // Save current order if not already saved (or if we need to sync)
+        // If we just loaded, originalPlaylist should call loadFolder. 
+        // But let's ensure we have a backup.
+        if (originalPlaylist.length === 0) {
+          originalPlaylist = [...currentPlaylist];
+        }
+
+        // Shuffle currentPlaylist
+        // If a song is playing, keep it playing (move to top or just re-find index)
+        const currentSong = currentPlaylist[currentTrackIndex];
+
+        // Shuffle everything
+        shuffleArray(currentPlaylist);
+
+        // If playing, find where the current song went and update index
+        if (currentSong) {
+          const newIndex = currentPlaylist.findIndex(s => s.id === currentSong.id);
+          if (newIndex !== -1) {
+            currentTrackIndex = newIndex;
+          }
+        }
+
+        // Update UI
+        if (btn) {
+          btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+          btn.style.boxShadow = '0 0 12px rgba(102, 126, 234, 0.6)';
+        }
+
+      } else {
+        // Turn OFF
+        isShuffleOn = false;
+        showMessage('Shuffle Off', false, 1500);
+
+        // Restore original order
+        if (originalPlaylist.length > 0) {
+          // If we had a current song, we need to map per ID to find new index in original
+          const currentSong = currentPlaylist[currentTrackIndex];
+
+          currentPlaylist = [...originalPlaylist];
+
+          if (currentSong) {
+            const newIndex = currentPlaylist.findIndex(s => s.id === currentSong.id);
+            if (newIndex !== -1) {
+              currentTrackIndex = newIndex;
+            }
+          }
+        }
+
+        // Update UI
+        if (btn) {
+          btn.style.background = ''; // reset to default CSS
+          btn.style.boxShadow = '';
+        }
       }
     }
 
@@ -1651,571 +1776,95 @@
     /* ================= PLAY MUSIC ================= */
     async function playSong(fileId, fileName) {
       try {
-        // Show loading state early so user sees feedback
-        document.getElementById("track-title").textContent = "Loading...";
+        // 1. Immediate UI Feedback
+        document.getElementById("track-title").textContent = "Loading " + fileName + "...";
+        document.querySelector(".play-btn").textContent = "⏸";
 
-        // Find and set current track index and mime type if available
+        // Find track index
         currentTrackIndex = currentPlaylist.findIndex(song => song.id === fileId);
-        const songItem = currentPlaylist[currentTrackIndex] || allItems.find(s => s.id === fileId) || {};
-        const mimeType = songItem.mimeType || 'audio/mpeg';
-        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-        // Use default album art for the bottom player for songs (do not show thumbnails)
-        setDefaultAlbumArt();
 
-
-        // Abort any previous streaming download
+        // 2. Cleanup previous streams
         if (currentStreamController) {
-          try { currentStreamController.abort(); } catch (e) { /* ignore */ }
+          try { currentStreamController.abort(); } catch (e) { }
           currentStreamController = null;
         }
-        // Clean up previous media source or object URL
-        if (currentAudioUrl) {
-          try { URL.revokeObjectURL(currentAudioUrl); } catch (e) { /* ignore */ }
-          currentAudioUrl = null;
-        }
         if (currentMediaSource) {
-          try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
+          try { currentMediaSource.endOfStream(); } catch (e) { }
           currentMediaSource = null;
+        }
+        if (currentAudioUrl) {
+          try { URL.revokeObjectURL(currentAudioUrl); } catch (e) { }
+          currentAudioUrl = null;
         }
 
         const player = document.getElementById("player");
 
-
-
-        // Helper fallback to download full blob if streaming not supported or fails
-        const streamFallback = async () => {
-          const res = await driveFetch(url);
-          if (!res.ok) {
-            throw new Error(`Failed to fetch audio: ${res.status}`);
-          }
-          const blob = await res.blob();
-          console.log("Blob type:", blob.type, "Size:", blob.size);
-
-          if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
-          currentAudioUrl = URL.createObjectURL(blob);
+        // 3. Check for Preloaded Blob (Fastest)
+        const pre = preloadedTracks[fileId];
+        if (pre && pre.fullBlobUrl) {
+          console.debug('Using preloaded full blob', fileId);
+          currentAudioUrl = pre.fullBlobUrl;
           player.src = currentAudioUrl;
-
-          // Update UI
-          document.getElementById("track-title").textContent = fileName;
-          document.querySelector(".play-btn").textContent = "⏸";
-          // Use default album art for audio files in the bottom player
-          setDefaultAlbumArt();
-
-          // Add event listeners
-          player.ontimeupdate = updateProgress;
-          player.onended = () => {
-            document.querySelector(".play-btn").textContent = "▶";
-            playNext();
-          };
-          player.onerror = (e) => {
-            console.error("Audio playback error:", e);
-            document.getElementById("track-title").textContent = "Error playing: " + fileName;
-          };
-
-          const playPromise = player.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(error => {
-              console.error("Play failed:", error);
-              document.querySelector(".play-btn").textContent = "▶";
-            });
-          }
-        };
-
-        // Helper to attempt a safe fallback to full download; guards against multiple attempts
-        let fallbackAttempted = false;
-        // Tracks whether we've already tried an aggressive head+tail init assembly for a file
-        const tailInitAttempted = {};
-        async function attemptFallback(reason) {
-          console.warn('attemptFallback:', reason);
-          if (fallbackAttempted) return;
-          fallbackAttempted = true;
-          showMessage('Playback error detected — falling back to full download', true);
-          try {
-            if (currentStreamController) {
-              try { currentStreamController.abort(); } catch (e) { }
-              currentStreamController = null;
-            }
-            if (currentMediaSource) {
-              try { currentMediaSource.endOfStream(); } catch (e) { }
-              currentMediaSource = null;
-            }
-          } catch (e) { console.debug('attemptFallback cleanup error', e); }
-
-          try { await streamFallback(); } catch (e) { console.error('Fallback failed', e); }
+          try { delete preloadedTracks[fileId]; } catch (e) { }
+        } else {
+          // 4. Force Full Download (User Request)
+          // Always download the full file blob before playing
+          await startFullDownload();
+          return;
         }
 
-        // Try streaming via MediaSource for faster startup, fallback to full download when not available
-        try {
-          if (window.MediaSource) {
-            let msType = mimeType;
-            // Try common codec hint for mp3 if necessary
-            if (!MediaSource.isTypeSupported(msType) && mimeType === 'audio/mpeg' && MediaSource.isTypeSupported('audio/mpeg; codecs="mp3"')) {
-              msType = 'audio/mpeg; codecs="mp3"';
-            }
+        // 5. Common Setup if preloaded worked (otherwise startFullDownload handles it)
+        finalizePlaybackSetup();
 
-            if (MediaSource.isTypeSupported(msType)) {
-              currentMediaSource = new MediaSource();
-              player.src = URL.createObjectURL(currentMediaSource);
-              currentStreamController = new AbortController();
-              const signal = currentStreamController.signal;
-
-              currentMediaSource.addEventListener('sourceopen', async function onOpen() {
-                currentMediaSource.removeEventListener('sourceopen', onOpen);
-                let sourceBuffer;
-                try {
-                  sourceBuffer = currentMediaSource.addSourceBuffer(msType);
-                  // Listen for SourceBuffer-level errors and attempt a fallback
-                  sourceBuffer.addEventListener('error', async (ev) => {
-                    console.error('SourceBuffer error', ev);
-                    await attemptFallback('SourceBuffer error');
-                  });
-                  // Listen for MediaSource-level errors
-                  currentMediaSource.addEventListener('error', async (ev) => {
-                    console.error('MediaSource error', ev);
-                    await attemptFallback('MediaSource error');
-                  });
-                } catch (e) {
-                  console.warn('SourceBuffer creation failed, falling back', e);
-                  await streamFallback();
-                  return;
-                }
-
-                try {
-                  // Range-based streaming: request a small initial chunk to start playback quickly,
-                  // then fetch subsequent ranges and append them to the SourceBuffer.
-                  let INITIAL_CHUNK = 128 * 1024; // 128KB initial chunk
-                  // Use a larger initial fetch for MP4/M4A containers to increase chances of getting ftyp/moov
-                  if (mimeType && (mimeType.includes('x-m4a') || mimeType.includes('mp4') || (fileName && fileName.toLowerCase().endsWith('.m4a')))) {
-                    INITIAL_CHUNK = 1024 * 1024; // 1MB
-                    console.debug('Using larger INITIAL_CHUNK for mp4/m4a', { fileId, INITIAL_CHUNK });
-                  }
-                  const CHUNK_SIZE = 256 * 1024; // 256KB per subsequent chunk
-
-                  // Fetch initial range (diagnostics enabled) - use preloaded buffer if available
-                  let initial;
-                  const pre = preloadedTracks[fileId];
-                  if (pre) {
-                    if (pre.fullBlobUrl) {
-                      // We have the full file available from prefetch — use blob playback immediately
-                      console.debug('Using preloaded full blob for', fileId);
-                      if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
-                      currentAudioUrl = pre.fullBlobUrl;
-                      player.src = currentAudioUrl;
-
-                      // Update UI and handlers (similar to fallback)
-                      document.getElementById("track-title").textContent = fileName;
-                      document.querySelector(".play-btn").textContent = "⏸";
-                      player.ontimeupdate = updateProgress;
-                      player.onended = () => { document.querySelector('.play-btn').textContent = '▶'; playNext(); };
-                      player.onerror = async (e) => {
-                        console.error("Audio playback error (preloaded full blob):", e, player.error);
-                        document.getElementById("track-title").textContent = "Error playing: " + fileName;
-                        await attemptFallback('preloaded full-blob playback error');
-                      };
-
-                      const playPromise = player.play();
-                      if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                          console.error("Play failed:", error);
-                          document.querySelector(".play-btn").textContent = "▶";
-                        });
-                      }
-
-                      // Clear preloaded entry (we're now using it as currentAudioUrl which will be revoked when replaced)
-                      try { delete preloadedTracks[fileId]; } catch (e) { }
-                      return;
-                    }
-
-                    if (pre.initialBuffer) {
-                      initial = { buffer: pre.initialBuffer, contentRange: pre.contentRange, status: pre.status };
-                      console.debug('Using preloaded initial buffer for', fileId, { contentRange: pre.contentRange });
-                    }
-                  }
-
-                  if (!initial) {
-                    const tFetchStart = performance.now();
-                    initial = await fetchRange(url, 0, INITIAL_CHUNK - 1, signal);
-                    const tFetchEnd = performance.now();
-                    console.debug('initialFetch', { fileId, start: 0, end: INITIAL_CHUNK - 1, status: initial.status, contentRange: initial.contentRange, fetchMs: initial.elapsed || (tFetchEnd - tFetchStart) });
-                  }
-
-                  // If server returned full file (status 200), treat as blob fallback
-                  if (initial.status === 200) {
-                    console.debug('Initial range returned full file (200) - using blob fallback', { size: initial.buffer.byteLength });
-                    const blob = new Blob([initial.buffer], { type: mimeType });
-                    if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
-                    currentAudioUrl = URL.createObjectURL(blob);
-                    player.src = currentAudioUrl;
-
-                    // Update UI and handlers (similar to fallback)
-                    document.getElementById("track-title").textContent = fileName;
-                    document.querySelector(".play-btn").textContent = "⏸";
-                    player.ontimeupdate = updateProgress;
-                    player.onended = () => { document.querySelector(".play-btn").textContent = "▶"; playNext(); };
-                    player.onerror = (e) => { console.error("Audio playback error:", e); document.getElementById("track-title").textContent = "Error playing: " + fileName; };
-
-                    const playPromise = player.play();
-                    if (playPromise !== undefined) {
-                      playPromise.catch(error => {
-                        console.error("Play failed:", error);
-                        document.querySelector(".play-btn").textContent = "▶";
-                      });
-                    }
-                    return;
-                  }
-
-                  // If we didn't find an init segment in the initial buffer, try to fetch the tail and assemble one
-                  if (!findBox(initial.buffer, 'moov')) {
-                    try {
-                      const tail = await fetchTail(url, Math.max(256 * 1024, INITIAL_CHUNK));
-                      const initSeg = await buildInitSegment(initial.buffer, tail.buffer);
-                      if (initSeg) {
-                        console.debug('Constructed init segment from head+tail');
-
-                        // Append init segment first
-                        await appendBufferSafe(sourceBuffer, initSeg);
-
-                        // Append the initial buffer but skip ftyp if we already included it
-                        const ftyp = findBox(initial.buffer, 'ftyp');
-                        let dataToAppend = initial.buffer;
-                        if (ftyp) {
-                          const skip = ftyp.pos + ftyp.size;
-                          dataToAppend = initial.buffer.slice(skip);
-                        }
-
-                        await appendBufferSafe(sourceBuffer, dataToAppend);
-
-                        // If we used a prefetched initial buffer, clear it to free memory
-                        try { if (preloadedTracks[fileId] && preloadedTracks[fileId].initialBuffer) delete preloadedTracks[fileId]; } catch (e) { /* ignore */ }
-
-                        // Start playback as soon as we have enough buffer; measure time to 'playing'
-                        if (player.paused && player.readyState >= 2) {
-                          const onPlaying = () => {
-                            console.debug('player playing', { sinceFetchMs: performance.now() - tFetchStart, readyState: player.readyState });
-                            player.removeEventListener('playing', onPlaying);
-                          };
-                          player.addEventListener('playing', onPlaying);
-                          try { await player.play(); document.querySelector('.play-btn').textContent = '⏸'; } catch (e) { console.error('Play failed after init assemble', e); player.removeEventListener('playing', onPlaying); }
-                        }
-
-                        // Continue fetching remaining ranges sequentially starting after the appended initial range
-                        let position = (initial.contentRange && initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/) ? (parseInt(initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/)[2], 10) + 1) : INITIAL_CHUNK);
-
-                        while (true) {
-                          if (signal && signal.aborted) break;
-                          const end = position + CHUNK_SIZE - 1;
-                          const chunk = await fetchRange(url, position, end, signal);
-                          await appendBufferSafe(sourceBuffer, chunk.buffer);
-
-                          if (chunk.status === 200) break;
-                          const cr = chunk.contentRange;
-                          if (cr) {
-                            const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                            if (m) {
-                              const chunkEnd = parseInt(m[2], 10);
-                              const total = m[3] === '*' ? null : parseInt(m[3], 10);
-                              position = chunkEnd + 1;
-                              if (total !== null && position > total) break;
-                            } else {
-                              position += chunk.buffer.byteLength;
-                            }
-                          } else {
-                            if (chunk.buffer.byteLength < CHUNK_SIZE) break;
-                            position += chunk.buffer.byteLength;
-                          }
-                        }
-
-                        try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
-
-                        // Update UI and handlers
-                        document.getElementById("track-title").textContent = fileName;
-                        document.querySelector(".play-btn").textContent = "⏸";
-                        player.ontimeupdate = updateProgress;
-                        player.onended = () => { document.querySelector('.play-btn').textContent = '▶'; playNext(); };
-                        player.onerror = async (e) => { console.error('Audio playback error after assembled init', e); await attemptFallback('playback after init assemble'); };
-
-                        return;
-                      } else {
-                        console.debug('Could not assemble init segment from head+tail — falling back to standard streaming');
-                      }
-                    } catch (e) {
-                      console.warn('Head+tail assembly failed', e);
-                    }
-                  }
-
-                  // Append initial chunk to buffer and measure append time
-                  const tAppendStart = performance.now();
-                  await appendBufferSafe(sourceBuffer, initial.buffer);
-                  const tAppendEnd = performance.now();
-                  console.debug('appendInitial', { appendMs: (tAppendEnd - tAppendStart), readyState: player.readyState, bufferedLength: player.buffered ? player.buffered.length : 0 });
-
-                  // If we used a prefetched initial buffer, clear it to free memory
-                  try { if (preloadedTracks[fileId] && preloadedTracks[fileId].initialBuffer) delete preloadedTracks[fileId]; } catch (e) { /* ignore */ }
-
-                  // Start playback as soon as we have enough buffer; measure time to 'playing'
-                  if (player.paused && player.readyState >= 2) {
-                    const onPlaying = () => {
-                      console.debug('player playing', { sinceFetchMs: performance.now() - tFetchStart, readyState: player.readyState });
-                      player.removeEventListener('playing', onPlaying);
-                    };
-                    player.addEventListener('playing', onPlaying);
-                    try { await player.play(); document.querySelector('.play-btn').textContent = '⏸'; } catch (e) { console.error('Play failed after initial chunk', e); player.removeEventListener('playing', onPlaying); }
-                  }
-
-                  // Determine total size if available from Content-Range header (format: bytes start-end/total)
-                  let totalBytes = null;
-                  if (initial.contentRange) {
-                    const m = initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                    if (m) {
-                      totalBytes = m[3] === '*' ? null : parseInt(m[3], 10);
-                    }
-                  }
-
-                  // Continue fetching remaining ranges with concurrency to reduce latency
-                  // Increase chunk sizes for fewer requests: use 1MB initial and 512KB chunks
-                  const CONCURRENT_CHUNKS = 3;
-                  const INIT_CHUNK_OVERRIDE = 1024 * 1024; // 1MB
-                  const CHUNK_SIZE_OVERRIDE = 512 * 1024; // 512KB
-                  const START_POS = (initial.contentRange && initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/) ? (parseInt(initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/)[2], 10) + 1) : INITIAL_CHUNK);
-                  let position = START_POS;
-
-                  // If the server's chunk size is small and we requested a larger initial prefetch, adjust
-                  const CHUNK = Math.max(CHUNK_SIZE, CHUNK_SIZE_OVERRIDE);
-
-                  // Try metadata if we don't have totalBytes yet
-                  if (!totalBytes) {
-                    try {
-                      const metaSize = await getFileSizeFromDrive(fileId);
-                      if (metaSize) {
-                        totalBytes = metaSize;
-                        console.debug('Using Drive metadata size', { fileId, totalBytes });
-                      }
-                    } catch (e) {
-                      console.debug('Drive metadata size probe failed', e);
-                    }
-                  }
-
-                  // If position is already beyond total (rare but possible), adjust or stop
-                  if (totalBytes !== null && position > totalBytes) {
-                    console.debug('Position beyond totalBytes; nothing to enqueue', { position, totalBytes });
-                  }
-
-                  // A map of start -> Promise of fetch result
-                  const pending = new Map();
-                  let lastEnqueued = position - 1;
-
-                  async function enqueue(start) {
-                    if (signal && signal.aborted) return;
-                    // guard against enqueuing beyond known total
-                    if (totalBytes !== null && start > totalBytes) return;
-                    const end = start + CHUNK - 1;
-                    const p = fetchRange(url, start, end, signal).then(r => ({ start, res: r })).catch(err => { throw err; });
-                    pending.set(start, p);
-                    lastEnqueued = Math.max(lastEnqueued, start);
-                    return p;
-                  }
-
-                  // Seed initial concurrent requests (skip those beyond known total)
-                  for (let i = 0; i < CONCURRENT_CHUNKS; i++) {
-                    const s = position + i * CHUNK;
-                    if (totalBytes !== null && s > totalBytes) break;
-                    enqueue(s).catch(e => console.debug('enqueue error', e));
-                    lastEnqueued = Math.max(lastEnqueued, s);
-                  }
-
-                  // Helper to parse range end from Content-Range header
-                  const parseEnd = (cr, bufLen) => {
-                    if (!cr) return bufLen;
-                    const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                    if (m) return parseInt(m[2], 10);
-                    return bufLen;
-                  };
-
-                  // Append in-order as chunks arrive (wait for each start position to be available)
-                  let appendPos = position;
-                  let recent416 = 0;
-                  while (true) {
-                    if (signal && signal.aborted) break;
-
-                    // Wait for the next chunk at appendPos to be available
-                    let p = pending.get(appendPos);
-                    if (!p) {
-                      // Try to enqueue it if not present
-                      if (totalBytes === null || appendPos <= totalBytes) {
-                        await enqueue(appendPos).catch(e => { console.debug('enqueue failed', e); });
-                        p = pending.get(appendPos);
-                      } else break;
-                    }
-
-                    let obj;
-                    try {
-                      obj = await p; // { start, res }
-                    } catch (e) {
-                      console.error('Chunk fetch failed', e);
-                      await attemptFallback('chunk fetch failed');
-                      break;
-                    }
-
-                    const chunk = obj.res;
-
-                    // If server returned 416 for this chunk, update total and stop
-                    if (chunk.status === 416) {
-                      recent416++;
-                      console.warn('Chunk fetch returned 416; treating as EOF', { start: obj.start, total: chunk.total, contentRange: chunk.contentRange, recent416 });
-                      if (chunk.total) totalBytes = chunk.total;
-
-                      // If we see repeated 416s, proactively probe metadata to get a reliable totalBytes
-                      if (recent416 >= 3 && (!totalBytes || totalBytes === null)) {
-                        try {
-                          const meta = await getFileSizeFromDrive(fileId);
-                          if (meta) {
-                            totalBytes = meta;
-                            console.debug('Recovered totalBytes from Drive after repeated 416s', { totalBytes });
-                          }
-                        } catch (e) { console.debug('Metadata probe after 416s failed', e); }
-                      }
-
-                      break;
-                    }
-                    // Append this chunk
-                    try {
-                      await appendBufferSafe(sourceBuffer, chunk.buffer);
-                    } catch (e) {
-                      console.error('Append failed for chunk', e);
-                      await attemptFallback('append failed');
-                      break;
-                    }
-
-                    // Advance appendPos based on returned content-range
-                    if (chunk.status === 200) {
-                      break; // full file or end reached
-                    }
-                    const cr = chunk.contentRange;
-                    if (cr) {
-                      const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                      if (m) {
-                        const chunkEnd = parseInt(m[2], 10);
-                        const total = m[3] === '*' ? null : parseInt(m[3], 10);
-                        appendPos = chunkEnd + 1;
-                        if (total !== null) totalBytes = total;
-                        if (total !== null && appendPos > total) break;
-                      } else {
-                        appendPos += chunk.buffer.byteLength;
-                      }
-                    } else {
-                      if (chunk.buffer.byteLength < CHUNK) break;
-                      appendPos += chunk.buffer.byteLength;
-                    }
-
-                    // Clean up pending entry
-                    pending.delete(obj.start);
-
-                    // Enqueue more to keep concurrency
-                    while ((lastEnqueued - appendPos) / CHUNK < CONCURRENT_CHUNKS) {
-                      const nextStart = lastEnqueued + CHUNK;
-                      if (totalBytes !== null && nextStart > totalBytes) break;
-                      enqueue(nextStart).catch(e => console.debug('enqueue error', e));
-                      lastEnqueued = Math.max(lastEnqueued, nextStart);
-                    }
-
-                    // Stop condition
-                    if (totalBytes !== null && appendPos > totalBytes) break;
-                  }
-
-                  try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
-                } catch (err) {
-                  if (err.name === 'AbortError') return; // aborted intentionally
-                  console.error('Streaming failed', err);
-                  showMessage('Streaming failed, falling back', true);
-                  await streamFallback();
-                }
-
-                // Update UI right away
-                document.getElementById("track-title").textContent = fileName;
-                document.querySelector(".play-btn").textContent = "⏸";
-                // Use default album art for audio files in the bottom player
-                setDefaultAlbumArt();
-
-                // Set handlers for end/error
-                player.ontimeupdate = updateProgress;
-                player.onended = () => { document.querySelector(".play-btn").textContent = "▶"; playNext(); };
-                player.onerror = async (e) => {
-                  console.error("Audio playback error (streaming):", e, player.error);
-                  document.getElementById("track-title").textContent = "Error playing: " + fileName;
-                  // Try one aggressive head+tail init assembly before doing a full download fallback
-                  if (!tailInitAttempted[fileId]) {
-                    tailInitAttempted[fileId] = true;
-                    showMessage('Streaming error — attempting head+tail init assembly', true);
-                    try {
-                      const HEAD_SIZE = 4 * 1024 * 1024; // 4MB head
-                      const head = await fetchRange(url, 0, HEAD_SIZE - 1, currentStreamController ? currentStreamController.signal : undefined);
-                      console.debug('Aggressive head fetched', { headBytes: head.buffer ? head.buffer.byteLength : 0, status: head.status, contentRange: head.contentRange });
-                      const tailSizes = [512 * 1024, 1024 * 1024, 4 * 1024 * 1024, 8 * 1024 * 1024];
-                      let initSeg = null;
-                      for (const ts of tailSizes) {
-                        try {
-                          const tail = await fetchTail(url, ts);
-                          console.debug('Aggressive tail fetched', { tailSizeRequested: ts, returnedBytes: tail.buffer ? tail.buffer.byteLength : 0, status: tail.status, contentRange: tail.contentRange });
-                          initSeg = await buildInitSegment(head.buffer, tail.buffer);
-                          if (initSeg) {
-                            console.debug('Aggressive head+tail assembled init with tailSize', ts);
-                            break;
-                          }
-                        } catch (err) {
-                          console.debug('Aggressive head+tail attempt failed for tailSize', ts, err);
-                        }
-                      }
-                      if (initSeg) {
-                        try { sourceBuffer.abort(); } catch (e) { }
-
-                        // Ensure sourceBuffer is still attached to the current MediaSource
-                        if (!currentMediaSource || !sourceBuffer || Array.prototype.indexOf.call(currentMediaSource.sourceBuffers, sourceBuffer) === -1) {
-                          console.warn('Aggressive init: sourceBuffer detached or MediaSource closed; aborting aggressive attempt');
-                          // If the media source is unstable, immediately fall back to full blob playback to reduce wait time
-                          showMessage('MediaSource unstable — falling back to full download', true);
-                          try {
-                            await streamFallback();
-                          } catch (e) { console.error('Immediate fallback after detached source failed', e); }
-                          return;
-                        } else {
-                          try {
-                            await appendBufferSafe(sourceBuffer, initSeg);
-                            const ftyp = findBox(head.buffer, 'ftyp');
-                            let dataToAppend = head.buffer;
-                            if (ftyp) {
-                              const skip = ftyp.pos + ftyp.size;
-                              dataToAppend = head.buffer.slice(skip);
-                            }
-                            await appendBufferSafe(sourceBuffer, dataToAppend);
-                            showMessage('Assembled init from head+tail; resuming streaming', false);
-                            return;
-                          } catch (err) {
-                            console.warn('Aggressive init append failed', err);
-                          }
-                        }
-                      }
-                    } catch (err) {
-                      console.warn('Aggressive head+tail assembly attempt failed', err);
-                    }
-                  }
-                  await attemptFallback('streaming playback error');
-                };
-              });
-
-              // Done setting up streaming path — return so fallback download is not started in parallel
-              return;
-            }
-          }
-        } catch (err) {
-          console.warn('MediaSource streaming not available or failed:', err);
-        }
-
-        // If streaming wasn't used or failed, fallback to full download
-        await streamFallback();
-      } catch (error) {
-        console.error("Error loading song:", error);
+      } catch (err) {
+        console.error("Error loading song:", err);
         document.getElementById("track-title").textContent = "Failed to load: " + fileName;
-        showMessage(error.message || 'Failed to load track', true);
+        document.querySelector(".play-btn").textContent = "▶";
+      }
+
+      function finalizePlaybackSetup() {
+        document.getElementById("track-title").textContent = fileName;
+        setDefaultAlbumArt();
+        player.ontimeupdate = updateProgress;
+        player.onended = () => {
+          document.querySelector(".play-btn").textContent = "▶";
+          playNext();
+        };
+        player.onerror = (e) => {
+           console.error("Playback error", player.error);
+           document.getElementById("track-title").textContent = "Error playing: " + fileName;
+        };
+        const playPromise = player.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.warn("Play auto-start prevented or failed:", error);
+            document.querySelector(".play-btn").textContent = "▶";
+          });
+        }
+      }
+
+      // Helper to download full blob and play
+      async function startFullDownload() {
+         try {
+            console.debug('Starting full download for', fileName);
+            const token = await getAccessToken();
+            const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+            const res = await driveFetch(url); 
+            if (!res.ok) throw new Error(res.status);
+            const blob = await res.blob();
+            
+            if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
+            currentAudioUrl = URL.createObjectURL(blob);
+            player.src = currentAudioUrl;
+            
+            // Finalize setup now that we have the src
+            finalizePlaybackSetup();
+            
+         } catch(e) {
+            console.error('Full download failed', e);
+            document.getElementById("track-title").textContent = "Error: " + e.message;
+            document.querySelector(".play-btn").textContent = "▶";
+         }
       }
     }
 
