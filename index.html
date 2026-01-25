@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Drive Music Player</title>
+  <title>DriveStream</title>
   <!-- Inline favicon to avoid 404 and provide a simple icon -->
-  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14' font-size='14'>🎵</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14' font-size='14'>🎵</text></svg>">
   <style>
     * {
       margin: 0;
@@ -179,24 +181,30 @@
 
     /* Shuffle button for folders */
     .shuffle-btn {
-      background: rgba(102, 126, 234, 0.12);
-      border: 1px solid rgba(102, 126, 234, 0.18);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
       color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 16px;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
       flex: 0 0 auto;
+      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
     }
 
     .shuffle-btn:hover {
-      transform: translateY(-2px);
-      background: rgba(102, 126, 234, 0.18);
+      transform: translateY(-2px) rotate(180deg);
+      box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
+    }
+
+    .shuffle-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: #fff;
     }
 
     /* Right-side actions container inside .item */
@@ -250,154 +258,160 @@
       font-size: 14px;
     }
 
-    /* Bottom Player */
+    /* Bottom Player - Modern "Floating" Design */
     #bottom-player {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(20, 20, 30, 0.9);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 8px 12px;
-      box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.4);
-      z-index: 50;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 95%;
+      max-width: 800px;
+      background: rgba(30, 30, 45, 0.85);
+      /* Slightly lighter/bluer dark base */
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 16px 24px;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Subtle hover effect for the whole player card */
+    #bottom-player:hover {
+      background: rgba(35, 35, 50, 0.9);
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.3);
+      transform: translateX(-50%) translateY(-2px);
     }
 
     .player-container {
-      max-width: 1200px;
-      margin: 0 auto;
+      width: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .player-info {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
+      gap: 16px;
+      margin-bottom: 0;
+      /* Add some horizontal padding to align with controls if needed */
     }
 
     .album-art {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      position: relative; /* allow spinner overlay */
-      overflow: hidden;
-    }
-
-    .album-art img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      border-radius: 4px;
-    }
-
-    .album-art .spinner {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 14px;
-      height: 14px;
-      margin-left: -7px;
-      margin-top: -7px;
-      border: 2px solid rgba(255,255,255,0.2);
-      border-top-color: rgba(255,255,255,0.8);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      z-index: 5;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      /* Improve shadow for depth */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .track-details {
-      flex: 1;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .track-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 3px;
     }
 
     .track-artist {
-      font-size: 13px;
-      color: #888;
-      margin-top: 2px;
+      font-size: 12px;
+      opacity: 0.7;
     }
 
     .player-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
+    }
+
+    /* Control grouping */
+    .controls-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .control-btn {
-      width: 34px;
-      height: 34px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: white;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s ease;
-      padding: 0;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      /* Circles are more modern than rounded rects for generic buttons */
+      font-size: 18px;
     }
 
     .control-btn:hover {
-      transform: scale(1.04);
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      transform: none;
+      /* Reset the old scale transform */
     }
 
     .play-btn {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-      font-size: 18px;
-      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      background: #fff;
+      /* White play button stands out */
+      color: #000;
+      /* Contrast text/icon */
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      /* Prevent squishing */
+      padding: 0;
+      /* Remove manual optical alignment that caused oval shape */
     }
 
     .play-btn:hover {
-      transform: scale(1.04);
+      transform: scale(1.05);
+      /* Slight pulse */
+      background: #fff;
+      box-shadow: 0 6px 16px rgba(255, 255, 255, 0.3);
     }
 
     .progress-container {
-      flex: 1;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      width: 100%;
+      padding: 0 4px;
     }
 
     .time-display {
       font-size: 11px;
-      color: #888;
-      min-width: 36px;
+      font-family: monospace;
+      /* Monospace prevents jitter as numbers change */
+      color: rgba(255, 255, 255, 0.5);
+      min-width: 38px;
     }
 
     .progress-bar {
       flex: 1;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 2px;
-      overflow: hidden;
-      cursor: pointer;
-      position: relative;
+      height: 5px;
+      /* Slightly thicker */
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
     }
 
     .progress-fill {
@@ -405,22 +419,31 @@
       background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
       width: 0%;
       transition: width 0.08s linear;
-      border-radius: 2px;
+      border-radius: 3px;
+      /* Add a glowing tip to the progress bar */
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
     }
 
-    /* Volume removed in compact player; replaced by shuffle button */
-    .volume-container {
-      display: none;
+    /* Responsive tweaks for the floating bar */
+    @media (max-width: 600px) {
+      #bottom-player {
+        bottom: 12px;
+        width: 94%;
+        padding: 12px 16px;
+      }
+
+      .player-controls {
+        flex-wrap: wrap;
+        /* Allow wrapping if very narrow */
+      }
+
+      .progress-container {
+        order: -1;
+        /* Move progress above controls on mobile? Or just keep basic */
+        /* Currently configured to be inside controls row. Let's keep it simple. */
+      }
     }
 
-    .volume-slider {
-      width: 100px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      cursor: pointer;
-      position: relative;
-    }
 
     .volume-fill {
       height: 100%;
@@ -455,6 +478,7 @@
         opacity: 0;
         transform: translateY(10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -477,11 +501,13 @@
       }
 
       .volume-container {
-        display: none; /* hide volume on small screens to save space */
+        display: none;
+        /* hide volume on small screens to save space */
       }
 
       .progress-container {
-        display: none; /* hide progress on small screens */
+        display: none;
+        /* hide progress on small screens */
       }
 
       .track-title {
@@ -504,1024 +530,1329 @@
         width: 100%;
       }
     }
+
+    /* Settings Modal */
+    .settings-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e0e0e0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-left: 15px;
+      transition: all 0.2s ease;
+    }
+
+    .settings-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(45deg);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: #1e1e2d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .close-modal:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #bbb;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    .form-help {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e0e0e0;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
   </style>
 </head>
+
 <body>
-<div class="container">
-  <div class="header">
-    <div class="logo">🎵 Drive Music</div>
-    <button id="login-btn" class="login-btn">Connect Google Drive</button>
-    <label style="margin-left:12px; font-size:13px; display:inline-flex; align-items:center; gap:8px; color:#e0e0e0;">
-      <input id="full-download-toggle" type="checkbox" style="width:14px;height:14px;" />
-      <span style="font-size:13px;">Full download</span>
-    </label>
-  </div>
-
-  <div id="notif" role="status" aria-live="polite" style="display:none; margin-top:10px; padding:8px 12px; border-radius:8px; border:1px solid transparent; color:#e0e0e0; font-size:13px;"></div>
-
-  <div class="nav-bar">
-    <button class="back-btn" onclick="goBack()">
-      <span>←</span>
-      <span>Back</span>
-    </button>
-    <div class="breadcrumb">
-      <span class="breadcrumb-item" id="breadcrumb">Music Library</span>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🎵 DriveStream</div>
+      <button id="login-btn" class="login-btn">Connect Google Drive</button>
     </div>
-    <div class="search-container">
-      <input type="text" id="search-input" class="search-input" placeholder="Search music..." oninput="handleSearch(this.value)">
-      <span class="search-icon">🔍</span>
+
+    <div id="notif" role="status" aria-live="polite"
+      style="display:none; margin-top:10px; padding:8px 12px; border-radius:8px; border:1px solid transparent; color:#e0e0e0; font-size:13px;">
     </div>
-  </div>
 
-  <div class="content-section" id="folders-section" style="display:none;">
-    <h2 class="section-title">Folders</h2>
-    <div class="grid" id="folders"></div>
-  </div>
-
-  <div class="content-section">
-    <h2 class="section-title">Content</h2>
-    <div class="grid" id="songs"></div>
-  </div>
-</div>
-
-<div id="bottom-player">
-  <div class="player-container">
-    <div class="player-info">
-      <div class="album-art">🎵</div>
-      <div class="track-details">
-        <div class="track-title" id="track-title">No track playing</div>
-        <div class="track-artist">Select a song to begin</div>
+    <div class="nav-bar">
+      <button class="back-btn" onclick="goBack()">
+        <span>←</span>
+        <span>Back</span>
+      </button>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item" id="breadcrumb">Music Library</span>
+      </div>
+      <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search music..."
+          oninput="handleSearch(this.value)">
+        <span class="search-icon">🔍</span>
       </div>
     </div>
 
-    <div class="player-controls">
-      <button class="control-btn" onclick="playPrevious()">⏮</button>
-      <button class="control-btn play-btn" onclick="togglePlay()">▶</button>
-      <button class="control-btn" onclick="playNext()">⏭</button>
+    <div class="content-section" id="folders-section" style="display:none;">
+      <h2 class="section-title">Folders</h2>
+      <div class="grid" id="folders"></div>
+    </div>
 
-      <div class="progress-container">
-        <span class="time-display" id="current-time">0:00</span>
-        <div class="progress-bar" onclick="seekByClick(event)">
-          <div class="progress-fill" id="progress-fill"></div>
+    <div class="content-section">
+      <h2 class="section-title">Content</h2>
+      <div class="grid" id="songs"></div>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Settings</div>
+        <button class="close-modal" aria-label="Close" onclick="closeSettings()">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="client-id-input">Google Client ID</label>
+        <input type="text" id="client-id-input" class="form-input" placeholder="Enter your OAuth 2.0 Client ID">
+        <div class="form-help">Create this in Google Cloud Console. Enable Drive API.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="folder-id-input">Root Folder ID (Optional)</label>
+        <input type="text" id="folder-id-input" class="form-input"
+          placeholder="Leave empty for root or enter specific Folder ID">
+        <div class="form-help">The ID of the Drive folder where your music is stored.</div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveConfig()">Save & Reload</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottom-player">
+    <div class="player-container">
+      <div class="player-info">
+        <div class="album-art">🎵</div>
+        <div class="track-details">
+          <div class="track-title" id="track-title">No track playing</div>
+          <div class="track-artist">Select a song to begin</div>
         </div>
-        <span class="time-display" id="total-time">0:00</span>
       </div>
 
-      <button class="control-btn shuffle-btn" title="Shuffle current folder" onclick="shuffleCurrentFolder()" aria-label="Shuffle current folder">🔀</button>
+      <div class="player-controls">
+        <button class="control-btn" onclick="playPrevious()">⏮</button>
+        <button class="control-btn play-btn" onclick="togglePlay()">▶</button>
+        <button class="control-btn" onclick="playNext()">⏭</button>
+
+        <div class="progress-container">
+          <span class="time-display" id="current-time">0:00</span>
+          <div class="progress-bar" onclick="seekByClick(event)">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <span class="time-display" id="total-time">0:00</span>
+        </div>
+
+        <button class="control-btn shuffle-btn" title="Shuffle current folder" onclick="shuffleCurrentFolder()"
+          aria-label="Shuffle current folder">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
+          </svg>
+        </button>
+      </div>
     </div>
+    <audio id="player"></audio>
   </div>
-  <audio id="player"></audio>
-</div>
 
-<script>
-  /* ================= CONFIG ================= */
-  const CLIENT_ID = "986736634476-ph01g1mpr6f50c0oi3qb61u946dcmtcc.apps.googleusercontent.com";
-  const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
-  const ROOT_MUSIC_FOLDER_ID = "1h7LJQvQmHq_XjJwxCch8SXtsjR3qjgdD";
+  <script>
+    /* ================= CONFIG ================= */
+    const CLIENT_ID = "986736634476-ph01g1mpr6f50c0oi3qb61u946dcmtcc.apps.googleusercontent.com";
+    const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
+    const ROOT_MUSIC_FOLDER_ID = "1h7LJQvQmHq_XjJwxCch8SXtsjR3qjgdD";
 
-  let accessToken = null;
-  let tokenClient = null;
-  let pendingTokenResolver = null;
-  let loginShouldLoadRoot = false;
-  let currentAudioUrl = null;
-  let folderStack = [];
-  let currentFolderId = ROOT_MUSIC_FOLDER_ID;
-  let allItems = []; // Store all items for search
-  let searchTimeout = null;
-  let currentPlaylist = []; // Songs in current folder
-  let currentTrackIndex = -1; // Current playing track index
-  // Streaming helpers to allow abort and MediaSource usage
-  let currentStreamController = null;
-  let currentMediaSource = null;
-  // Track album art blob URL so we can revoke it when replaced
-  let currentAlbumArtUrl = null;
+    let accessToken = null;
+    let tokenClient = null;
+    let pendingTokenResolver = null;
+    let loginShouldLoadRoot = false;
+    let currentAudioUrl = null;
+    let folderStack = [];
+    let currentFolderId = ROOT_MUSIC_FOLDER_ID;
+    let allItems = []; // Store all items for search
+    let searchTimeout = null;
+    let currentPlaylist = []; // Songs in current folder
+    let currentTrackIndex = -1; // Current playing track index
+    // Streaming helpers to allow abort and MediaSource usage
+    let currentStreamController = null;
+    let currentMediaSource = null;
 
-  // Prefetching helpers to reduce gap between songs
-  const PREFETCH_THRESHOLD = 20; // seconds before end to start preloading
-  // Increase initial prefetch to 512KB for more reliable quick starts
-  const PREFETCH_INITIAL_CHUNK = 512 * 1024; // initial bytes to fetch for next track
-  let preloadedTracks = {}; // fileId -> { initialBuffer, contentRange, status, fullBlobUrl }
-  let prefetchControllers = {};
+    // Track album art blob URL so we can revoke it when replaced
+    let currentAlbumArtUrl = null;
 
-  /* ================= LOGIN ================= */
-  function login(shouldLoadRoot = true) {
-    // If GSI hasn't loaded yet, wait a short while and try again (improves UX on slow network)
-    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-      showMessage('Google Identity Services loading… will try shortly.', false, 3000);
-      const start = Date.now();
-      const wait = setInterval(() => {
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-          clearInterval(wait);
-          login(shouldLoadRoot);
-        } else if (Date.now() - start > 10000) {
-          clearInterval(wait);
-          showMessage('Google Identity Services failed to load. Check network or try reloading the page.', true);
-        }
-      }, 500);
-      return;
+    // Set the default bottom album art (simple emoji/icon) and clear any previous blob URL
+    function setDefaultAlbumArt() {
+      const el = document.querySelector('.album-art');
+      if (!el) return;
+      if (currentAlbumArtUrl) {
+        try { URL.revokeObjectURL(currentAlbumArtUrl); } catch (e) { }
+        currentAlbumArtUrl = null;
+      }
+
+      // Premium SVG Audio Icon
+      const audioIconSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+        <circle cx="24" cy="24" r="20" fill="#2d3436"/>
+        <path d="M20,14v16.1c-0.8-0.6-1.9-1-3-1c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5V20h8v-6H20z" fill="#a29bfe"/>
+      </svg>
+    `;
+
+      el.innerHTML = audioIconSvg;
+      el.style.background = 'transparent';
+      el.style.boxShadow = 'none';
     }
 
-    if (!tokenClient) {
-      try {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-          callback: token => {
-            accessToken = token.access_token;
-            if (pendingTokenResolver) {
-              pendingTokenResolver(accessToken);
-              pendingTokenResolver = null;
-            }
-            if (loginShouldLoadRoot) {
-              loginShouldLoadRoot = false;
-              loadRootFolders();
-            }
+    // Prefetching helpers to reduce gap between songs
+    const PREFETCH_THRESHOLD = 20; // seconds before end to start preloading
+    // Increase initial prefetch to 512KB for more reliable quick starts
+    const PREFETCH_INITIAL_CHUNK = 512 * 1024; // initial bytes to fetch for next track
+    let preloadedTracks = {}; // fileId -> { initialBuffer, contentRange, status, fullBlobUrl }
+    let prefetchControllers = {};
+
+    /* ================= LOGIN ================= */
+    function login(shouldLoadRoot = true) {
+      // If GSI hasn't loaded yet, wait a short while and try again (improves UX on slow network)
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+        showMessage('Google Identity Services loading… will try shortly.', false, 3000);
+        const start = Date.now();
+        const wait = setInterval(() => {
+          if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+            clearInterval(wait);
+            login(shouldLoadRoot);
+          } else if (Date.now() - start > 10000) {
+            clearInterval(wait);
+            showMessage('Google Identity Services failed to load. Check network or try reloading the page.', true);
           }
-        });
-      } catch (e) {
-        showMessage('Failed to initialize Google Identity (check console).', true);
-        console.error(e);
+        }, 500);
         return;
       }
-    }
-    loginShouldLoadRoot = shouldLoadRoot;
-    try {
-      tokenClient.requestAccessToken({ prompt: '' });
-    } catch (e) {
-      showMessage('Failed to request access token.', true);
-      console.error(e);
-    }
-  }
 
-  // Get an access token, prompting if needed. Resolves to a token string or rejects on timeout/error.
-  function getAccessToken() {
-    return new Promise((resolve, reject) => {
-      if (accessToken) return resolve(accessToken);
       if (!tokenClient) {
-        // Create token client on-demand and request a token (do not auto-load root by default)
-        login(false);
-      }
-      pendingTokenResolver = (token) => resolve(token);
-      // Trigger a token request which will resolve pendingTokenResolver via callback
-      tokenClient.requestAccessToken({ prompt: '' });
-      // Timeout in case something goes wrong with the token flow
-      setTimeout(() => {
-        if (pendingTokenResolver) {
-          pendingTokenResolver = null;
-          reject(new Error('Timed out getting access token'));
-        }
-      }, 15000);
-    });
-  }
-
-  // Wrapper for Google Drive requests that ensures a valid token and retries once on 401/403
-  async function driveFetch(url, options = {}) {
-    try {
-      await getAccessToken();
-      options.headers = options.headers || {};
-      options.headers['Authorization'] = `Bearer ${accessToken}`;
-
-      let res = await fetch(url, options);
-      if (res.status === 401 || res.status === 403) {
-        // Try refreshing token and retry once
-        accessToken = null;
         try {
-          await getAccessToken();
-          options.headers['Authorization'] = `Bearer ${accessToken}`;
-          res = await fetch(url, options);
-        } catch (err) {
-          showMessage('Authentication required. Please sign in.', true);
-          throw err;
+          tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: token => {
+              accessToken = token.access_token;
+              if (pendingTokenResolver) {
+                pendingTokenResolver(accessToken);
+                pendingTokenResolver = null;
+              }
+              if (loginShouldLoadRoot) {
+                loginShouldLoadRoot = false;
+                loadRootFolders();
+              }
+            }
+          });
+        } catch (e) {
+          showMessage('Failed to initialize Google Identity (check console).', true);
+          console.error(e);
+          return;
         }
       }
+      loginShouldLoadRoot = shouldLoadRoot;
+      try {
+        tokenClient.requestAccessToken({ prompt: '' });
+      } catch (e) {
+        showMessage('Failed to request access token.', true);
+        console.error(e);
+      }
+    }
 
-      // If non-OK, show a message but return the response to callers for fine-grained handling
-      if (!res.ok) {
-        console.debug('driveFetch: non-OK response', { url, status: res.status, statusText: res.statusText });
-        showMessage(`Request failed: ${res.status} ${res.statusText}`, true);
+    // Get an access token, prompting if needed. Resolves to a token string or rejects on timeout/error.
+    function getAccessToken() {
+      return new Promise((resolve, reject) => {
+        if (accessToken) return resolve(accessToken);
+        if (!tokenClient) {
+          // Create token client on-demand and request a token (do not auto-load root by default)
+          login(false);
+        }
+        pendingTokenResolver = (token) => resolve(token);
+        // Trigger a token request which will resolve pendingTokenResolver via callback
+        tokenClient.requestAccessToken({ prompt: '' });
+        // Timeout in case something goes wrong with the token flow
+        setTimeout(() => {
+          if (pendingTokenResolver) {
+            pendingTokenResolver = null;
+            reject(new Error('Timed out getting access token'));
+          }
+        }, 15000);
+      });
+    }
+
+    // Wrapper for Google Drive requests that ensures a valid token and retries once on 401/403
+    async function driveFetch(url, options = {}) {
+      try {
+        await getAccessToken();
+        options.headers = options.headers || {};
+        options.headers['Authorization'] = `Bearer ${accessToken}`;
+
+        let res = await fetch(url, options);
+        if (res.status === 401 || res.status === 403) {
+          // Try refreshing token and retry once
+          accessToken = null;
+          try {
+            await getAccessToken();
+            options.headers['Authorization'] = `Bearer ${accessToken}`;
+            res = await fetch(url, options);
+          } catch (err) {
+            showMessage('Authentication required. Please sign in.', true);
+            throw err;
+          }
+        }
+
+        // If non-OK, show a message but return the response to callers for fine-grained handling
+        if (!res.ok) {
+          console.debug('driveFetch: non-OK response', { url, status: res.status, statusText: res.statusText });
+          showMessage(`Request failed: ${res.status} ${res.statusText}`, true);
+        }
+
+        return res;
+      } catch (err) {
+        showMessage(err.message || 'Network error', true);
+        throw err;
+      }
+    }
+
+    // Simple non-blocking notification UI helper
+    function showMessage(msg, isError = false, timeout = 5000) {
+      const el = document.getElementById('notif');
+      if (!el) {
+        console.log((isError ? 'ERROR: ' : '') + msg);
+        return;
+      }
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.style.background = isError ? 'rgba(255, 80, 80, 0.08)' : 'rgba(102, 126, 234, 0.06)';
+      el.style.borderColor = isError ? 'rgba(255, 80, 80, 0.16)' : 'rgba(102, 126, 234, 0.12)';
+      setTimeout(() => { el.style.display = 'none'; }, timeout);
+    }
+
+    // Set album art for current track. Tries the provided thumbnail URL, and falls back to fetching the image via driveFetch if direct load fails.
+    async function setAlbumArt(fileId, thumbnailLink) {
+      const el = document.querySelector('.album-art');
+      if (!el) return;
+      console.debug('setAlbumArt start', { fileId, thumbnailLink });
+
+      // Remove previous object URL if any
+      if (currentAlbumArtUrl) {
+        try { URL.revokeObjectURL(currentAlbumArtUrl); } catch (e) { /* ignore */ }
+        currentAlbumArtUrl = null;
       }
 
-      return res;
-    } catch (err) {
-      showMessage(err.message || 'Network error', true);
-      throw err;
-    }
-  }
-
-  // Simple non-blocking notification UI helper
-  function showMessage(msg, isError = false, timeout = 5000) {
-    const el = document.getElementById('notif');
-    if (!el) {
-      console.log((isError ? 'ERROR: ' : '') + msg);
-      return;
-    }
-    el.textContent = msg;
-    el.style.display = 'block';
-    el.style.background = isError ? 'rgba(255, 80, 80, 0.08)' : 'rgba(102, 126, 234, 0.06)';
-    el.style.borderColor = isError ? 'rgba(255, 80, 80, 0.16)' : 'rgba(102, 126, 234, 0.12)';
-    setTimeout(() => { el.style.display = 'none'; }, timeout);
-  }
-
-  // Set album art for current track. Tries the provided thumbnail URL, and falls back to fetching the image via driveFetch if direct load fails.
-  async function setAlbumArt(fileId, thumbnailLink) {
-    const el = document.querySelector('.album-art');
-    if (!el) return;
-    console.debug('setAlbumArt start', { fileId, thumbnailLink });
-
-    // Remove previous object URL if any
-    if (currentAlbumArtUrl) {
-      try { URL.revokeObjectURL(currentAlbumArtUrl); } catch (e) { /* ignore */ }
-      currentAlbumArtUrl = null;
-    }
-
-    // Show spinner and clear existing content
-    el.innerHTML = '';
-    const spinner = document.createElement('div');
-    spinner.className = 'spinner';
-    el.appendChild(spinner);
-
-    // Default to emoji while loading/fallback
-    let used = false;
-    if (!thumbnailLink) {
-      // No thumbnail available -> remove spinner and show default
-      spinner.remove();
-      el.textContent = '🎵';
-      console.debug('setAlbumArt: no thumbnailLink provided');
-      return;
-    }
-
-    // Try direct image load first (may fail due to CORS or auth)
-    try {
-      const img = new Image();
-      img.alt = 'Album art';
-      img.src = thumbnailLink;
-      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
-      spinner.remove();
+      // Show spinner and clear existing content
       el.innerHTML = '';
-      el.appendChild(img);
-      used = true;
-      console.debug('setAlbumArt: direct load succeeded');
-    } catch (err) {
-      console.debug('setAlbumArt: direct load failed, trying auth fetch', err);
-      // Direct load failed; fall back to fetching via authorized connection
+      const spinner = document.createElement('div');
+      spinner.className = 'spinner';
+      el.appendChild(spinner);
+
+      // Default to emoji while loading/fallback
+      let used = false;
+      if (!thumbnailLink) {
+        // No thumbnail available -> remove spinner and show default
+        spinner.remove();
+        el.textContent = '🎵';
+        console.debug('setAlbumArt: no thumbnailLink provided');
+        return;
+      }
+
+      // Try direct image load first (may fail due to CORS or auth)
       try {
-        const res = await driveFetch(thumbnailLink);
-        console.debug('setAlbumArt: driveFetch response', { status: res.status, ok: res.ok });
-        if (!res.ok) throw new Error('Thumbnail fetch failed');
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        currentAlbumArtUrl = url;
         const img = new Image();
         img.alt = 'Album art';
-        img.src = url;
+        img.src = thumbnailLink;
         await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
         spinner.remove();
         el.innerHTML = '';
         el.appendChild(img);
         used = true;
-        console.debug('setAlbumArt: auth fetch succeeded');
-      } catch (err2) {
-        console.warn('Failed to load thumbnail via auth fetch', err2);
-      }
-    }
-
-    if (!used) {
-      spinner.remove();
-      el.textContent = '🎵';
-      console.debug('setAlbumArt: using fallback emoji');
-    }
-  }
-
-  // Set the default bottom album art (simple emoji/icon) and clear any previous blob URL
-  function setDefaultAlbumArt() {
-    const el = document.querySelector('.album-art');
-    if (!el) return;
-    if (currentAlbumArtUrl) {
-      try { URL.revokeObjectURL(currentAlbumArtUrl); } catch (e) {}
-      currentAlbumArtUrl = null;
-    }
-    el.innerHTML = '🎵';
-  }
-
-  // Load an <img> element with a thumbnail URL. Tries direct load first and falls back to fetching via driveFetch (auth) if needed.
-  async function loadThumbnailImage(imgEl, thumbnailUrl) {
-    if (!imgEl || !thumbnailUrl) return;
-    console.debug('loadThumbnailImage start', { thumbnailUrl, imgEl });
-    return new Promise(async (resolve) => {
-      let revokedUrl = null;
-      const cleanup = () => {
-        imgEl.onload = null; imgEl.onerror = null;
-        if (revokedUrl) {
-          try { URL.revokeObjectURL(revokedUrl); } catch (e) {}
-          revokedUrl = null;
-        }
-        resolve();
-      };
-
-      imgEl.onload = () => {
-        console.debug('loadThumbnailImage: direct load succeeded', { thumbnailUrl });
-        cleanup();
-      };
-      imgEl.onerror = async (ev) => {
-        console.debug('loadThumbnailImage: direct load failed, will try auth fetch', { thumbnailUrl, error: ev });
-        // Try fetching via authorized endpoint (driveFetch)
-        try {
-          const res = await driveFetch(thumbnailUrl);
-          console.debug('loadThumbnailImage: driveFetch response', { status: res.status, ok: res.ok });
-          if (!res.ok) return cleanup();
-          const blob = await res.blob();
-          revokedUrl = URL.createObjectURL(blob);
-          imgEl.src = revokedUrl;
-          // Wait for onload/onerror to resolve
-        } catch (e) {
-          console.debug('loadThumbnailImage: auth fetch failed', e);
-          cleanup();
-        }
-      };
-
-      // Kick off: try direct set first
-      try { imgEl.src = thumbnailUrl; } catch (e) { imgEl.onerror && imgEl.onerror(e); }
-    });
-  }
-
-  // Fetch a byte range using Drive and return buffer + headers; logs timing and response for diagnostics
-  async function fetchRange(url, start, end, signal) {
-    const options = { headers: { Range: `bytes=${start}-${end}` } };
-    if (signal) options.signal = signal;
-    const t0 = performance.now();
-    const res = await driveFetch(url, options);
-
-    // Handle 416 Range Not Satisfiable by probing for total size where possible
-    const cr = res.headers.get('Content-Range');
-    if (res.status === 416) {
-      console.warn('fetchRange: 416 Range Not Satisfiable', { url, start, end, contentRange: cr });
-      let total = null;
-      if (cr) {
-        const m = cr.match(/\/(\d+)\s*$/);
-        if (m) total = parseInt(m[1], 10);
-      }
-      if (total === null) {
-        try {
-          // Lightweight probe to get a Content-Range with total when server supports it
-          const probe = await driveFetch(url, { headers: { Range: 'bytes=0-0' } });
-          const cr2 = probe.headers.get('Content-Range');
-          if (cr2) {
-            const m2 = cr2.match(/\/(\d+)\s*$/);
-            if (m2) total = parseInt(m2[1], 10);
-          }
-        } catch (e) { console.debug('fetchRange probe failed', e); }
-      }
-      return { buffer: new ArrayBuffer(0), contentRange: cr, status: res.status, elapsed: (performance.now() - t0), total };
-    }
-
-    const buffer = await res.arrayBuffer();
-    const t1 = performance.now();
-    console.debug('fetchRange', { url, start, end, status: res.status, contentRange: cr, elapsedMs: (t1 - t0), returnedBytes: buffer.byteLength });
-    return { buffer, contentRange: cr, status: res.status, elapsed: (t1 - t0) };
-  }
-
-  // Append ArrayBuffer to SourceBuffer and wait for updateend
-  function appendBufferSafe(sourceBuffer, arrayBuffer) {
-    return new Promise((resolve, reject) => {
-      const onUpdate = () => { sourceBuffer.removeEventListener('updateend', onUpdate); resolve(); };
-      sourceBuffer.addEventListener('updateend', onUpdate);
-      try {
-        sourceBuffer.appendBuffer(arrayBuffer);
+        console.debug('setAlbumArt: direct load succeeded');
       } catch (err) {
-        sourceBuffer.removeEventListener('updateend', onUpdate);
-        reject(err);
-      }
-    });
-  }
-
-  // Find a top-level MP4 box by name in an ArrayBuffer
-  function findBox(arrayBuffer, name) {
-    if (!arrayBuffer) return null;
-    const dv = new DataView(arrayBuffer);
-    let pos = 0;
-    const len = arrayBuffer.byteLength;
-    while (pos + 8 <= len) {
-      const size = dv.getUint32(pos);
-      const type = String.fromCharCode(
-        dv.getUint8(pos+4), dv.getUint8(pos+5), dv.getUint8(pos+6), dv.getUint8(pos+7)
-      );
-      if (type === name) return { pos, size };
-      if (size === 0) break; // box extends to end
-      pos += size;
-    }
-    return null;
-  }
-
-  // Concatenate two ArrayBuffers into one
-  function concatArrayBuffers(a, b) {
-    const aLen = a ? a.byteLength : 0;
-    const bLen = b ? b.byteLength : 0;
-    const tmp = new Uint8Array(aLen + bLen);
-    if (a) tmp.set(new Uint8Array(a), 0);
-    if (b) tmp.set(new Uint8Array(b), aLen);
-    return tmp.buffer;
-  }
-
-  // Fetch the last `tailSize` bytes of a resource using Range suffix request
-  async function fetchTail(url, tailSize = 512 * 1024) {
-    try {
-      const options = { headers: { Range: `bytes=-${tailSize}` } };
-      const res = await driveFetch(url, options);
-      const buffer = await res.arrayBuffer();
-      const cr = res.headers.get('Content-Range');
-      console.debug('fetchTail', { url, tailSize, status: res.status, contentRange: cr, returnedBytes: buffer.byteLength });
-      return { buffer, contentRange: cr, status: res.status };
-    } catch (e) {
-      console.warn('fetchTail failed', e);
-      throw e;
-    }
-  }
-
-  // Query Drive metadata for file size (returns integer bytes or null)
-  async function getFileSizeFromDrive(fileId) {
-    try {
-      if (!fileId) return null;
-      const url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=size`;
-      const res = await driveFetch(url);
-      if (!res.ok) return null;
-      const js = await res.json();
-      if (js && js.size) {
-        console.debug('getFileSizeFromDrive', { fileId, size: js.size });
-        return parseInt(js.size, 10);
-      }
-    } catch (e) {
-      console.debug('getFileSizeFromDrive failed', e);
-    }
-    return null;
-  }
-  // Try to build an init segment (ftyp+moov) from initial and tail buffers.
-  // Prefer mp4box.js when available; otherwise fall back to simple ftyp+moov concatenation.
-  async function buildInitSegment(initialBuffer, tailBuffer) {
-    // If moov already in initial, nothing to do
-    if (findBox(initialBuffer, 'moov')) {
-      console.debug('buildInitSegment: moov found in initial buffer');
-      return initialBuffer;
-    }
-
-    // Try mp4box if available
-    if (window.MP4Box && typeof MP4Box.createFile === 'function') {
-      try {
-        return await new Promise((resolve, reject) => {
-          const mp4boxfile = MP4Box.createFile();
-          mp4boxfile.onError = function(e) { reject(e); };
-          mp4boxfile.onReady = function(info) {
-            try {
-              console.debug('mp4box onReady', info);
-              if (info && info.tracks) console.debug('mp4box tracks', info.tracks.map(t=>({id:t.id, type:t.type, codec:t.codec})));
-              // mp4box exposes an init segment builder; try to request it
-              if (typeof mp4boxfile.initializeSegmentation === 'function') {
-                const initSeg = mp4boxfile.initializeSegmentation();
-                if (initSeg && initSeg.buffer) return resolve(initSeg.buffer);
-              }
-              if (typeof mp4boxfile.getInitSegment === 'function') {
-                const initSeg = mp4boxfile.getInitSegment();
-                if (initSeg && initSeg.buffer) return resolve(initSeg.buffer);
-              }
-              // Fallback: try to generate init by exporting ftyp+moov manually via mp4box's internal structures
-              // If above methods didn't return a proper init, reject and fallback to manual concatenation
-              reject(new Error('mp4box could not produce init segment'));
-            } catch (err) { reject(err); }
-          };
-
-          // Feed buffers to mp4box with fileStart offsets
-          try {
-            const buf1 = initialBuffer.slice(0);
-            buf1.fileStart = 0;
-            mp4boxfile.appendBuffer(buf1);
-            if (tailBuffer) {
-              const buf2 = tailBuffer.slice(0);
-              buf2.fileStart = initialBuffer.byteLength;
-              mp4boxfile.appendBuffer(buf2);
-            }
-            mp4boxfile.flush();
-          } catch (err) { reject(err); }
-        });
-      } catch (e) {
-        console.warn('mp4box attempt failed, falling back to simple concat', e);
-      }
-    }
-
-    // Simple fallback: find ftyp in initial, moov in tail and concat
-    const ftyp = findBox(initialBuffer, 'ftyp');
-    const moov = findBox(tailBuffer, 'moov');
-    console.debug('buildInitSegment: ftyp found?', !!ftyp, 'moov found?', !!moov, ftyp, moov);
-    if (ftyp && moov) {
-      const ftypBuf = initialBuffer.slice(ftyp.pos, ftyp.pos + ftyp.size);
-      const moovBuf = tailBuffer.slice(moov.pos, moov.pos + moov.size);
-      return concatArrayBuffers(ftypBuf, moovBuf);
-    }
-
-    // Could not build init
-    return null;
-  }
-
-  /* ================= ROOT FOLDERS ================= */
-  async function loadRootFolders() {
-    folderStack = [];
-    currentFolderId = ROOT_MUSIC_FOLDER_ID;
-    updateBreadcrumb();
-
-    const res = await driveFetch(
-      `https://www.googleapis.com/drive/v3/files?q='${ROOT_MUSIC_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name,thumbnailLink,iconLink)`
-    );
-    const data = await res.json();
-
-    const folderList = document.getElementById("folders");
-    const songsList = document.getElementById("songs");
-    folderList.innerHTML = "";
-    songsList.innerHTML = "";
-    // Remove any folder-level header shuffle that might exist
-    const parent = songsList.parentNode;
-    const existingHeader = parent.querySelector('.folder-shuffle-header');
-    if (existingHeader) existingHeader.remove();
-
-    // Clear search when going to root
-    document.getElementById("search-input").value = "";
-    allItems = [];
-
-    if (data.files && data.files.length > 0) {
-      document.getElementById("folders-section").style.display = "block";
-      data.files.forEach((folder, i) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.style.animationDelay = `${i * 0.05}s`;
-
-        const iconWrapper = document.createElement('div');
-        iconWrapper.className = 'item-icon';
-        const textDiv = document.createElement('div');
-        textDiv.className = 'item-text';
-        textDiv.textContent = folder.name;
-
-        const thumbCandidate = folder.thumbnailLink || folder.iconLink;
-        if (thumbCandidate) {
-          const img = document.createElement('img');
-          img.alt = folder.name;
-          loadThumbnailImage(img, thumbCandidate).catch(()=>{});
-          iconWrapper.appendChild(img);
-        } else {
-          iconWrapper.textContent = '📁';
+        console.debug('setAlbumArt: direct load failed, trying auth fetch', err);
+        // Direct load failed; fall back to fetching via authorized connection
+        try {
+          const res = await driveFetch(thumbnailLink);
+          console.debug('setAlbumArt: driveFetch response', { status: res.status, ok: res.ok });
+          if (!res.ok) throw new Error('Thumbnail fetch failed');
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          currentAlbumArtUrl = url;
+          const img = new Image();
+          img.alt = 'Album art';
+          img.src = url;
+          await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+          spinner.remove();
+          el.innerHTML = '';
+          el.appendChild(img);
+          used = true;
+          console.debug('setAlbumArt: auth fetch succeeded');
+        } catch (err2) {
+          console.warn('Failed to load thumbnail via auth fetch', err2);
         }
+      }
 
-        div.appendChild(iconWrapper);
-        div.appendChild(textDiv);
-
-        // Add per-folder shuffle button that doesn't trigger the folder click
-        const shuffleBtn = document.createElement('button');
-        shuffleBtn.className = 'shuffle-btn';
-        shuffleBtn.title = 'Shuffle this folder';
-        shuffleBtn.textContent = '🔀';
-        shuffleBtn.onclick = (e) => { e.stopPropagation(); shuffleFolder(folder.id, folder.name); };
-        const actions = document.createElement('div');
-        actions.className = 'item-actions';
-        actions.appendChild(shuffleBtn);
-        div.appendChild(actions);
-
-        div.onclick = () => loadFolder(folder.id, folder.name);
-        folderList.appendChild(div);
-      });
-    } else {
-      document.getElementById("folders-section").style.display = "none";
+      if (!used) {
+        spinner.remove();
+        el.textContent = '🎵';
+        console.debug('setAlbumArt: using fallback emoji');
+      }
     }
-  }
 
-  /* ================= LOAD ANY FOLDER ================= */
-  async function loadFolder(folderId, folderName = "", pushHistory = true) {
-    if (folderId === currentFolderId) return;
-
-    if (pushHistory) {
-      folderStack.push({ id: currentFolderId, name: folderName });
+    // Set the default bottom album art (simple emoji/icon) and clear any previous blob URL
+    function setDefaultAlbumArt() {
+      const el = document.querySelector('.album-art');
+      if (!el) return;
+      if (currentAlbumArtUrl) {
+        try { URL.revokeObjectURL(currentAlbumArtUrl); } catch (e) { }
+        currentAlbumArtUrl = null;
+      }
+      el.innerHTML = '🎵';
     }
-    currentFolderId = folderId;
-    updateBreadcrumb();
 
-    const res = await driveFetch(
-      `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,thumbnailLink,iconLink)`
-    );
-    const data = await res.json();
-
-    // Store items for search
-    allItems = data.files || [];
-
-    // Build playlist from audio files only
-    currentPlaylist = allItems.filter(item => item.mimeType.startsWith("audio/"));
-
-    const songsList = document.getElementById("songs");
-    songsList.innerHTML = "";
-    document.getElementById("folders-section").style.display = "none";
-
-    // Clear search when navigating
-    document.getElementById("search-input").value = "";
-
-    displayItems(allItems);
-
-    // Add a header-level shuffle button for this folder view (if any audio files present)
-    const songsContainer = document.getElementById('songs');
-    const parent = songsContainer.parentNode;
-    // Remove existing header if any (avoid duplicates)
-    const existingHeader = parent.querySelector('.folder-shuffle-header');
-    if (existingHeader) existingHeader.remove();
-    if (currentPlaylist && currentPlaylist.length > 0) {
-      const headerShuffle = document.createElement('div');
-      headerShuffle.className = 'folder-shuffle-header';
-      const headerBtn = document.createElement('button');
-      headerBtn.className = 'shuffle-btn';
-      headerBtn.title = 'Shuffle songs in this folder';
-      headerBtn.textContent = '🔀';
-      headerBtn.onclick = () => shuffleCurrentFolder();
-      headerShuffle.appendChild(headerBtn);
-      parent.insertBefore(headerShuffle, songsContainer);
-    }
-  }
-
-  function displayItems(items) {
-    const songsList = document.getElementById("songs");
-    songsList.innerHTML = "";
-
-    if (items && items.length > 0) {
-      items.forEach((item, i) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.style.animationDelay = `${i * 0.05}s`;
-
-        // Build icon area and text
-        const iconWrapper = document.createElement('div');
-        iconWrapper.className = 'item-icon';
-        const textDiv = document.createElement('div');
-        textDiv.className = 'item-text';
-        textDiv.textContent = item.name;
-
-        // For audio files, always show the default music icon; no thumbnails in the list
-        if (item.mimeType && item.mimeType.startsWith('audio/')) {
-          iconWrapper.textContent = '🎵';
-        } else {
-          // For folders and other types, show thumbnail/icon if available, else fallback
-          const thumbCandidate = item.thumbnailLink || item.iconLink;
-          if (thumbCandidate) {
-            const img = document.createElement('img');
-            img.alt = item.name;
-            loadThumbnailImage(img, thumbCandidate).catch(() => {});
-            iconWrapper.appendChild(img);
-          } else {
-            iconWrapper.textContent = item.mimeType === 'application/vnd.google-apps.folder' ? '📁' : '🎵';
+    // Load an <img> element with a thumbnail URL. Tries direct load first and falls back to fetching via driveFetch (auth) if needed.
+    async function loadThumbnailImage(imgEl, thumbnailUrl) {
+      if (!imgEl || !thumbnailUrl) return;
+      console.debug('loadThumbnailImage start', { thumbnailUrl, imgEl });
+      return new Promise(async (resolve) => {
+        let revokedUrl = null;
+        const cleanup = () => {
+          imgEl.onload = null; imgEl.onerror = null;
+          if (revokedUrl) {
+            try { URL.revokeObjectURL(revokedUrl); } catch (e) { }
+            revokedUrl = null;
           }
+          resolve();
+        };
+
+        imgEl.onload = () => {
+          console.debug('loadThumbnailImage: direct load succeeded', { thumbnailUrl });
+          cleanup();
+        };
+        imgEl.onerror = async (ev) => {
+          console.debug('loadThumbnailImage: direct load failed, will try auth fetch', { thumbnailUrl, error: ev });
+          // Try fetching via authorized endpoint (driveFetch)
+          try {
+            const res = await driveFetch(thumbnailUrl);
+            console.debug('loadThumbnailImage: driveFetch response', { status: res.status, ok: res.ok });
+            if (!res.ok) return cleanup();
+            const blob = await res.blob();
+            revokedUrl = URL.createObjectURL(blob);
+            imgEl.src = revokedUrl;
+            // Wait for onload/onerror to resolve
+          } catch (e) {
+            console.debug('loadThumbnailImage: auth fetch failed', e);
+            cleanup();
+          }
+        };
+
+        // Kick off: try direct set first
+        try { imgEl.src = thumbnailUrl; } catch (e) { imgEl.onerror && imgEl.onerror(e); }
+      });
+    }
+
+    // Fetch a byte range using Drive and return buffer + headers; logs timing and response for diagnostics
+    async function fetchRange(url, start, end, signal) {
+      const options = { headers: { Range: `bytes=${start}-${end}` } };
+      if (signal) options.signal = signal;
+      const t0 = performance.now();
+      const res = await driveFetch(url, options);
+
+      // Handle 416 Range Not Satisfiable by probing for total size where possible
+      const cr = res.headers.get('Content-Range');
+      if (res.status === 416) {
+        console.warn('fetchRange: 416 Range Not Satisfiable', { url, start, end, contentRange: cr });
+        let total = null;
+        if (cr) {
+          const m = cr.match(/\/(\d+)\s*$/);
+          if (m) total = parseInt(m[1], 10);
         }
+        if (total === null) {
+          try {
+            // Lightweight probe to get a Content-Range with total when server supports it
+            const probe = await driveFetch(url, { headers: { Range: 'bytes=0-0' } });
+            const cr2 = probe.headers.get('Content-Range');
+            if (cr2) {
+              const m2 = cr2.match(/\/(\d+)\s*$/);
+              if (m2) total = parseInt(m2[1], 10);
+            }
+          } catch (e) { console.debug('fetchRange probe failed', e); }
+        }
+        return { buffer: new ArrayBuffer(0), contentRange: cr, status: res.status, elapsed: (performance.now() - t0), total };
+      }
 
-        div.appendChild(iconWrapper);
-        div.appendChild(textDiv);
+      const buffer = await res.arrayBuffer();
+      const t1 = performance.now();
+      console.debug('fetchRange', { url, start, end, status: res.status, contentRange: cr, elapsedMs: (t1 - t0), returnedBytes: buffer.byteLength });
+      return { buffer, contentRange: cr, status: res.status, elapsed: (t1 - t0) };
+    }
 
-        // If this is a folder, add a small shuffle button and folder click handler
-        if (item.mimeType === "application/vnd.google-apps.folder") {
+    // Append ArrayBuffer to SourceBuffer and wait for updateend
+    function appendBufferSafe(sourceBuffer, arrayBuffer) {
+      return new Promise((resolve, reject) => {
+        const onUpdate = () => { sourceBuffer.removeEventListener('updateend', onUpdate); resolve(); };
+        sourceBuffer.addEventListener('updateend', onUpdate);
+        try {
+          sourceBuffer.appendBuffer(arrayBuffer);
+        } catch (err) {
+          sourceBuffer.removeEventListener('updateend', onUpdate);
+          reject(err);
+        }
+      });
+    }
+
+    // Find a top-level MP4 box by name in an ArrayBuffer
+    function findBox(arrayBuffer, name) {
+      if (!arrayBuffer) return null;
+      const dv = new DataView(arrayBuffer);
+      let pos = 0;
+      const len = arrayBuffer.byteLength;
+      while (pos + 8 <= len) {
+        const size = dv.getUint32(pos);
+        const type = String.fromCharCode(
+          dv.getUint8(pos + 4), dv.getUint8(pos + 5), dv.getUint8(pos + 6), dv.getUint8(pos + 7)
+        );
+        if (type === name) return { pos, size };
+        if (size === 0) break; // box extends to end
+        pos += size;
+      }
+      return null;
+    }
+
+    // Concatenate two ArrayBuffers into one
+    function concatArrayBuffers(a, b) {
+      const aLen = a ? a.byteLength : 0;
+      const bLen = b ? b.byteLength : 0;
+      const tmp = new Uint8Array(aLen + bLen);
+      if (a) tmp.set(new Uint8Array(a), 0);
+      if (b) tmp.set(new Uint8Array(b), aLen);
+      return tmp.buffer;
+    }
+
+    // Fetch the last `tailSize` bytes of a resource using Range suffix request
+    async function fetchTail(url, tailSize = 512 * 1024) {
+      try {
+        const options = { headers: { Range: `bytes=-${tailSize}` } };
+        const res = await driveFetch(url, options);
+        const buffer = await res.arrayBuffer();
+        const cr = res.headers.get('Content-Range');
+        console.debug('fetchTail', { url, tailSize, status: res.status, contentRange: cr, returnedBytes: buffer.byteLength });
+        return { buffer, contentRange: cr, status: res.status };
+      } catch (e) {
+        console.warn('fetchTail failed', e);
+        throw e;
+      }
+    }
+
+    // Query Drive metadata for file size (returns integer bytes or null)
+    async function getFileSizeFromDrive(fileId) {
+      try {
+        if (!fileId) return null;
+        const url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=size`;
+        const res = await driveFetch(url);
+        if (!res.ok) return null;
+        const js = await res.json();
+        if (js && js.size) {
+          console.debug('getFileSizeFromDrive', { fileId, size: js.size });
+          return parseInt(js.size, 10);
+        }
+      } catch (e) {
+        console.debug('getFileSizeFromDrive failed', e);
+      }
+      return null;
+    }
+    // Try to build an init segment (ftyp+moov) from initial and tail buffers.
+    // Prefer mp4box.js when available; otherwise fall back to simple ftyp+moov concatenation.
+    async function buildInitSegment(initialBuffer, tailBuffer) {
+      // If moov already in initial, nothing to do
+      if (findBox(initialBuffer, 'moov')) {
+        console.debug('buildInitSegment: moov found in initial buffer');
+        return initialBuffer;
+      }
+
+      // Try mp4box if available
+      if (window.MP4Box && typeof MP4Box.createFile === 'function') {
+        try {
+          return await new Promise((resolve, reject) => {
+            const mp4boxfile = MP4Box.createFile();
+            mp4boxfile.onError = function (e) { reject(e); };
+            mp4boxfile.onReady = function (info) {
+              try {
+                console.debug('mp4box onReady', info);
+                if (info && info.tracks) console.debug('mp4box tracks', info.tracks.map(t => ({ id: t.id, type: t.type, codec: t.codec })));
+                // mp4box exposes an init segment builder; try to request it
+                if (typeof mp4boxfile.initializeSegmentation === 'function') {
+                  const initSeg = mp4boxfile.initializeSegmentation();
+                  if (initSeg && initSeg.buffer) return resolve(initSeg.buffer);
+                }
+                if (typeof mp4boxfile.getInitSegment === 'function') {
+                  const initSeg = mp4boxfile.getInitSegment();
+                  if (initSeg && initSeg.buffer) return resolve(initSeg.buffer);
+                }
+                // Fallback: try to generate init by exporting ftyp+moov manually via mp4box's internal structures
+                // If above methods didn't return a proper init, reject and fallback to manual concatenation
+                reject(new Error('mp4box could not produce init segment'));
+              } catch (err) { reject(err); }
+            };
+
+            // Feed buffers to mp4box with fileStart offsets
+            try {
+              const buf1 = initialBuffer.slice(0);
+              buf1.fileStart = 0;
+              mp4boxfile.appendBuffer(buf1);
+              if (tailBuffer) {
+                const buf2 = tailBuffer.slice(0);
+                buf2.fileStart = initialBuffer.byteLength;
+                mp4boxfile.appendBuffer(buf2);
+              }
+              mp4boxfile.flush();
+            } catch (err) { reject(err); }
+          });
+        } catch (e) {
+          console.warn('mp4box attempt failed, falling back to simple concat', e);
+        }
+      }
+
+      // Simple fallback: find ftyp in initial, moov in tail and concat
+      const ftyp = findBox(initialBuffer, 'ftyp');
+      const moov = findBox(tailBuffer, 'moov');
+      console.debug('buildInitSegment: ftyp found?', !!ftyp, 'moov found?', !!moov, ftyp, moov);
+      if (ftyp && moov) {
+        const ftypBuf = initialBuffer.slice(ftyp.pos, ftyp.pos + ftyp.size);
+        const moovBuf = tailBuffer.slice(moov.pos, moov.pos + moov.size);
+        return concatArrayBuffers(ftypBuf, moovBuf);
+      }
+
+      // Could not build init
+      return null;
+    }
+
+    /* ================= ROOT FOLDERS ================= */
+    async function loadRootFolders() {
+      folderStack = [];
+      currentFolderId = ROOT_MUSIC_FOLDER_ID;
+      updateBreadcrumb();
+
+      const res = await driveFetch(
+        `https://www.googleapis.com/drive/v3/files?q='${ROOT_MUSIC_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name,thumbnailLink,iconLink)`
+      );
+      const data = await res.json();
+      allItems = data.files || []; // Fix: Populate allItems so search works in root folder
+
+      const folderList = document.getElementById("folders");
+
+      const songsList = document.getElementById("songs");
+      folderList.innerHTML = "";
+      songsList.innerHTML = "";
+      // Remove any folder-level header shuffle that might exist
+      const parent = songsList.parentNode;
+      const existingHeader = parent.querySelector('.folder-shuffle-header');
+      if (existingHeader) existingHeader.remove();
+
+      // Clear search when going to root
+      document.getElementById("search-input").value = "";
+
+
+      if (data.files && data.files.length > 0) {
+        document.getElementById("folders-section").style.display = "block";
+        data.files.forEach((folder, i) => {
+          const div = document.createElement("div");
+          div.className = "item";
+          div.style.animationDelay = `${i * 0.05}s`;
+
+          const iconWrapper = document.createElement('div');
+          iconWrapper.className = 'item-icon';
+          const textDiv = document.createElement('div');
+          textDiv.className = 'item-text';
+          textDiv.textContent = folder.name;
+
+          // Custom flat folder icon (SVG)
+          const folderIconSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+              <defs>
+                <linearGradient id="folderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#7e9dfa;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#5a7ce0;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="folderBackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#9eb5fc;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#7e9dfa;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+              <path d="M40,12H22l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="url(#folderBackGrad)"/>
+              <path d="M40,12H22l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="none" opacity="0.1"/>
+              <path d="M40,15H8c-2.2-0.1-4,1.8-4,4v17c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V19C44,16.8,42.2,15,40,15z" fill="url(#folderGrad)"/>
+            </svg>
+          `;
+
+          // Use custom icon for folders, ignore Drive's low-res iconLink
+          iconWrapper.innerHTML = folderIconSvg;
+          // Apply a slightly different style to the wrapper for these icons
+          iconWrapper.style.background = 'transparent';
+          iconWrapper.style.transform = 'scale(1.2)';
+
+          div.appendChild(iconWrapper);
+          div.appendChild(textDiv);
+
+          // Add per-folder shuffle button that doesn't trigger the folder click
           const shuffleBtn = document.createElement('button');
           shuffleBtn.className = 'shuffle-btn';
           shuffleBtn.title = 'Shuffle this folder';
-          shuffleBtn.textContent = '🔀';
-          shuffleBtn.onclick = (e) => { e.stopPropagation(); shuffleFolder(item.id, item.name); };
+          shuffleBtn.innerHTML = `
+            <svg viewBox="0 0 24 24">
+              <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+            </svg>
+          `;
+          shuffleBtn.onclick = (e) => { e.stopPropagation(); shuffleFolder(folder.id, folder.name); };
           const actions = document.createElement('div');
           actions.className = 'item-actions';
           actions.appendChild(shuffleBtn);
           div.appendChild(actions);
 
-          div.onclick = () => loadFolder(item.id, item.name);
-        } else if (item.mimeType && item.mimeType.startsWith("audio/")) {
-          div.onclick = () => playSong(item.id, item.name);
-        }
+          div.onclick = () => loadFolder(folder.id, folder.name);
+          folderList.appendChild(div);
+        });
+      } else {
+        document.getElementById("folders-section").style.display = "none";
+      }
+    }
 
-        songsList.appendChild(div);
-      });
-    } else {
-      songsList.innerHTML = `
+    /* ================= LOAD ANY FOLDER ================= */
+    async function loadFolder(folderId, folderName = "", pushHistory = true) {
+      if (folderId === currentFolderId) return;
+
+      if (pushHistory) {
+        folderStack.push({ id: currentFolderId, name: folderName });
+      }
+      currentFolderId = folderId;
+      updateBreadcrumb();
+
+      const res = await driveFetch(
+        `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,thumbnailLink,iconLink)`
+      );
+      const data = await res.json();
+
+      // Store items for search
+      allItems = data.files || [];
+
+      // Build playlist from audio files only
+      currentPlaylist = allItems.filter(item => item.mimeType.startsWith("audio/"));
+
+      const songsList = document.getElementById("songs");
+      songsList.innerHTML = "";
+      document.getElementById("folders-section").style.display = "none";
+
+      // Clear search when navigating
+      document.getElementById("search-input").value = "";
+
+      displayItems(allItems);
+
+      // Add a header-level shuffle button for this folder view (if any audio files present)
+      const songsContainer = document.getElementById('songs');
+      const parent = songsContainer.parentNode;
+      // Remove existing header if any (avoid duplicates)
+      const existingHeader = parent.querySelector('.folder-shuffle-header');
+      if (existingHeader) existingHeader.remove();
+      if (currentPlaylist && currentPlaylist.length > 0) {
+        const headerShuffle = document.createElement('div');
+        headerShuffle.className = 'folder-shuffle-header';
+        const headerBtn = document.createElement('button');
+        headerBtn.className = 'shuffle-btn';
+        headerBtn.title = 'Shuffle songs in this folder';
+        headerBtn.innerHTML = `
+          <svg viewBox="0 0 24 24">
+            <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+          </svg>
+        `;
+        headerBtn.onclick = () => shuffleCurrentFolder();
+        headerShuffle.appendChild(headerBtn);
+        parent.insertBefore(headerShuffle, songsContainer);
+      }
+    }
+
+    function displayItems(items) {
+      const songsList = document.getElementById("songs");
+      songsList.innerHTML = "";
+
+      if (items && items.length > 0) {
+        items.forEach((item, i) => {
+          const div = document.createElement("div");
+          div.className = "item";
+          div.style.animationDelay = `${i * 0.05}s`;
+
+          // Build icon area and text
+          const iconWrapper = document.createElement('div');
+          iconWrapper.className = 'item-icon';
+          const textDiv = document.createElement('div');
+          textDiv.className = 'item-text';
+          textDiv.textContent = item.name;
+
+
+          // Custom SVG definitions
+          const folderIconSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+              <defs>
+                <linearGradient id="folderGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#7e9dfa;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#5a7ce0;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="folderBackGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#9eb5fc;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#7e9dfa;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+              <path d="M40,12H22l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="url(#folderBackGrad2)"/>
+              <path d="M40,15H8c-2.2-0.1-4,1.8-4,4v17c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V19C44,16.8,42.2,15,40,15z" fill="url(#folderGrad2)"/>
+            </svg>
+          `;
+
+          const audioIconSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+              <circle cx="24" cy="24" r="20" fill="#2d3436"/>
+              <path d="M20,14v16.1c-0.8-0.6-1.9-1-3-1c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5V20h8v-6H20z" fill="#a29bfe"/>
+            </svg>
+          `;
+
+          // Handle icons based on type
+          if (item.mimeType === 'application/vnd.google-apps.folder') {
+            iconWrapper.innerHTML = folderIconSvg;
+            iconWrapper.style.background = 'transparent';
+            iconWrapper.style.transform = 'scale(1.2)';
+          } else if (item.mimeType && item.mimeType.startsWith('audio/')) {
+            iconWrapper.innerHTML = audioIconSvg;
+            iconWrapper.style.background = 'transparent';
+          } else {
+            // For other types, try thumbnail or default
+            const thumbCandidate = item.thumbnailLink || item.iconLink;
+            if (thumbCandidate) {
+              const img = document.createElement('img');
+              img.alt = item.name;
+              loadThumbnailImage(img, thumbCandidate).catch(() => { });
+              iconWrapper.appendChild(img);
+            } else {
+              iconWrapper.textContent = '�';
+            }
+          }
+
+          div.appendChild(iconWrapper);
+          div.appendChild(textDiv);
+
+          // If this is a folder, add a small shuffle button and folder click handler
+          if (item.mimeType === "application/vnd.google-apps.folder") {
+            const shuffleBtn = document.createElement('button');
+            shuffleBtn.className = 'shuffle-btn';
+            shuffleBtn.title = 'Shuffle this folder';
+            // Simple flat Shuffle SVG
+            shuffleBtn.innerHTML = `
+              <svg viewBox="0 0 24 24">
+                <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+              </svg>
+            `;
+            shuffleBtn.onclick = (e) => { e.stopPropagation(); shuffleFolder(item.id, item.name); };
+            const actions = document.createElement('div');
+            actions.className = 'item-actions';
+            actions.appendChild(shuffleBtn);
+            div.appendChild(actions);
+
+            div.onclick = () => loadFolder(item.id, item.name);
+          } else if (item.mimeType && item.mimeType.startsWith("audio/")) {
+            div.onclick = () => playSong(item.id, item.name);
+          }
+
+          songsList.appendChild(div);
+        });
+      } else {
+        songsList.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">🎵</div>
           <div>No music files found</div>
         </div>
       `;
-    }
-  }
-
-  // Shuffle helper (Fisher-Yates)
-  function shuffleArray(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-  }
-
-  // Shuffle a folder by fetching its audio files, randomizing order, and starting playback
-  async function shuffleFolder(folderId, folderName = '') {
-    try {
-      showMessage(`Shuffling "${folderName || 'folder'}"...`, false, 2000);
-      const res = await driveFetch(
-        `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,thumbnailLink,iconLink)`
-      );
-      const data = await res.json();
-      const songs = (data.files || []).filter(f => f.mimeType && f.mimeType.startsWith('audio/'));
-      if (songs.length === 0) {
-        showMessage('No songs found in this folder', true);
-        return;
       }
-      shuffleArray(songs);
-      currentPlaylist = songs;
-      currentTrackIndex = 0;
-      playSong(currentPlaylist[0].id, currentPlaylist[0].name);
-    } catch (e) {
-      console.error('shuffleFolder failed', e);
-      showMessage('Failed to shuffle folder', true);
     }
-  }
 
-  // Shuffle the currently-loaded folder playlist (no network fetch required)
-  function shuffleCurrentFolder() {
-    if (!currentPlaylist || currentPlaylist.length === 0) {
-      showMessage('No songs to shuffle in this folder', true);
-      return;
+    // Shuffle helper (Fisher-Yates)
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
     }
-    shuffleArray(currentPlaylist);
-    currentTrackIndex = 0;
-    playSong(currentPlaylist[0].id, currentPlaylist[0].name);
-  }
 
-  // Prefetch the beginning of a file so the next track can start immediately
-  async function prefetchNextTrack(fileId, fileName, mimeType) {
-    if (!fileId) return;
-    if (preloadedTracks[fileId] || prefetchControllers[fileId]) return; // already prefetching or prefetched
-    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-
-    // Controller used for the initial chunk; if we start a background full fetch we'll replace this with a background controller
-    const initialCtrl = new AbortController();
-    prefetchControllers[fileId] = initialCtrl;
-
-    try {
-      console.debug('prefetchNextTrack: starting (initial chunk)', { fileId, fileName });
-
-      // Fetch a small initial chunk (same size used for streaming startup)
-      const initialRes = await fetchRange(url, 0, PREFETCH_INITIAL_CHUNK - 1, initialCtrl.signal);
-
-      // If server returned full file (200), create a blob URL for immediate playback
-      if (initialRes.status === 200) {
-        const blob = new Blob([initialRes.buffer], { type: (mimeType || 'audio/mpeg') });
-        const urlObj = URL.createObjectURL(blob);
-        preloadedTracks[fileId] = { fullBlobUrl: urlObj, status: 200 };
-        console.debug('prefetchNextTrack: full file fetched (initial returned 200)', { fileId, size: initialRes.buffer.byteLength });
-
-        // No background fetching needed; clear controller
-        if (prefetchControllers[fileId] === initialCtrl) delete prefetchControllers[fileId];
-        return;
-      }
-
-      // Store initial buffer and metadata
-      preloadedTracks[fileId] = { initialBuffer: initialRes.buffer, contentRange: initialRes.contentRange, status: initialRes.status };
-      console.debug('prefetchNextTrack: initial chunk fetched', { fileId, contentRange: initialRes.contentRange });
-
-      // Start background fetch of the remaining bytes to get the full file for seamless playback
-      (async () => {
-        try {
-          // Determine byte ranges from Content-Range header if possible
-          let start = null;
-          let total = null;
-          if (initialRes.contentRange) {
-            const m = initialRes.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-            if (m) {
-              start = parseInt(m[2], 10) + 1;
-              total = m[3] === '*' ? null : parseInt(m[3], 10);
-            }
-          }
-
-          if (total !== null && start !== null && start <= (total - 1)) {
-            const bgCtrl = new AbortController();
-            prefetchControllers[fileId] = bgCtrl;
-            console.debug('prefetchNextTrack: background tail fetch', { fileId, start, end: total - 1 });
-            const tail = await fetchRange(url, start, total - 1, bgCtrl.signal);
-
-            // Combine initial buffer + tail into a single Blob and expose via object URL
-            const combined = new Blob([preloadedTracks[fileId].initialBuffer, tail.buffer], { type: (mimeType || 'audio/mpeg') });
-            const blobUrl = URL.createObjectURL(combined);
-
-            // Replace preloaded entry with full blob reference and free initialBuffer
-            try { delete preloadedTracks[fileId].initialBuffer; } catch (e) {}
-            preloadedTracks[fileId] = { fullBlobUrl: blobUrl, status: 200 };
-            console.debug('prefetchNextTrack: full blob assembled and ready', { fileId });
-          } else {
-            // Unknown total size: fall back to fetching the full file directly
-            console.debug('prefetchNextTrack: unknown total, falling back to full fetch', { fileId });
-            const bgCtrl = new AbortController();
-            prefetchControllers[fileId] = bgCtrl;
-            const fullRes = await driveFetch(url, { signal: bgCtrl.signal });
-            if (fullRes && fullRes.ok) {
-              const blob = await fullRes.blob();
-              const blobUrl = URL.createObjectURL(blob);
-              preloadedTracks[fileId] = { fullBlobUrl: blobUrl, status: 200 };
-              console.debug('prefetchNextTrack: full fetch succeeded', { fileId });
-            }
-          }
-        } catch (e) {
-          if (e && e.name === 'AbortError') console.debug('prefetchNextTrack background aborted', { fileId });
-          else console.warn('prefetchNextTrack background failed', e);
-        } finally {
-          // Clear any background controller reference if it's the one we set
-          if (prefetchControllers[fileId] && typeof prefetchControllers[fileId].signal === 'undefined') {
-            // We set a controller object (legacy); clear it
-            delete prefetchControllers[fileId];
-          } else if (prefetchControllers[fileId] && typeof prefetchControllers[fileId].abort === 'function') {
-            // Clear if it's still a controller
-            delete prefetchControllers[fileId];
-          }
-        }
-      })();
-
-    } catch (e) {
-      if (e && e.name === 'AbortError') console.debug('prefetchNextTrack aborted (initial)', { fileId });
-      else console.warn('prefetchNextTrack failed', e);
-      if (prefetchControllers[fileId] === initialCtrl) delete prefetchControllers[fileId];
-    }
-  }
-
-  // Clear any preloaded entry and revoke objectURL if present
-  function clearPreloaded(fileId) {
-    const p = preloadedTracks[fileId];
-    if (!p) return;
-    if (p.fullBlobUrl) {
-      try { URL.revokeObjectURL(p.fullBlobUrl); } catch (e) {}
-    }
-    delete preloadedTracks[fileId];
-  }
-
-  /* ================= PLAY MUSIC ================= */
-  async function playSong(fileId, fileName) {
-    try {
-      // Show loading state early so user sees feedback
-      document.getElementById("track-title").textContent = "Loading...";
-
-      // Find and set current track index and mime type if available
-      currentTrackIndex = currentPlaylist.findIndex(song => song.id === fileId);
-      const songItem = currentPlaylist[currentTrackIndex] || allItems.find(s => s.id === fileId) || {};
-      const mimeType = songItem.mimeType || 'audio/mpeg';
-      const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-      // Use default album art for the bottom player for songs (do not show thumbnails)
-      setDefaultAlbumArt();
-
-
-      // Abort any previous streaming download
-      if (currentStreamController) {
-        try { currentStreamController.abort(); } catch (e) { /* ignore */ }
-        currentStreamController = null;
-      }
-      // Clean up previous media source or object URL
-      if (currentAudioUrl) {
-        try { URL.revokeObjectURL(currentAudioUrl); } catch (e) { /* ignore */ }
-        currentAudioUrl = null;
-      }
-      if (currentMediaSource) {
-        try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
-        currentMediaSource = null;
-      }
-
-      const player = document.getElementById("player");
-
-      // If user requested full download mode via the UI toggle, skip streaming and play full blob
+    // Shuffle a folder by fetching its audio files, randomizing order, and starting playback
+    async function shuffleFolder(folderId, folderName = '') {
       try {
-        const fullToggle = document.getElementById('full-download-toggle');
-        if (fullToggle && fullToggle.checked) {
-          console.debug('Full download toggle enabled — using full blob playback for', fileId);
-          await streamFallback();
+        showMessage(`Shuffling "${folderName || 'folder'}"...`, false, 2000);
+        const res = await driveFetch(
+          `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,thumbnailLink,iconLink)`
+        );
+        const data = await res.json();
+        const songs = (data.files || []).filter(f => f.mimeType && f.mimeType.startsWith('audio/'));
+        if (songs.length === 0) {
+          showMessage('No songs found in this folder', true);
           return;
         }
-      } catch (e) { /* ignore */ }
+        shuffleArray(songs);
+        currentPlaylist = songs;
+        currentTrackIndex = 0;
+        playSong(currentPlaylist[0].id, currentPlaylist[0].name);
+      } catch (e) {
+        console.error('shuffleFolder failed', e);
+        showMessage('Failed to shuffle folder', true);
+      }
+    }
 
-      // Helper fallback to download full blob if streaming not supported or fails
-      const streamFallback = async () => {
-        const res = await driveFetch(url);
-        if (!res.ok) {
-          throw new Error(`Failed to fetch audio: ${res.status}`);
+    // Shuffle the currently-loaded folder playlist (no network fetch required)
+    function shuffleCurrentFolder() {
+      if (!currentPlaylist || currentPlaylist.length === 0) {
+        showMessage('No songs to shuffle in this folder', true);
+        return;
+      }
+      shuffleArray(currentPlaylist);
+      currentTrackIndex = 0;
+      playSong(currentPlaylist[0].id, currentPlaylist[0].name);
+    }
+
+    // Prefetch the beginning of a file so the next track can start immediately
+    async function prefetchNextTrack(fileId, fileName, mimeType) {
+      if (!fileId) return;
+      if (preloadedTracks[fileId] || prefetchControllers[fileId]) return; // already prefetching or prefetched
+      const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+
+      // Controller used for the initial chunk; if we start a background full fetch we'll replace this with a background controller
+      const initialCtrl = new AbortController();
+      prefetchControllers[fileId] = initialCtrl;
+
+      try {
+        console.debug('prefetchNextTrack: starting (initial chunk)', { fileId, fileName });
+
+        // Fetch a small initial chunk (same size used for streaming startup)
+        const initialRes = await fetchRange(url, 0, PREFETCH_INITIAL_CHUNK - 1, initialCtrl.signal);
+
+        // If server returned full file (200), create a blob URL for immediate playback
+        if (initialRes.status === 200) {
+          const blob = new Blob([initialRes.buffer], { type: (mimeType || 'audio/mpeg') });
+          const urlObj = URL.createObjectURL(blob);
+          preloadedTracks[fileId] = { fullBlobUrl: urlObj, status: 200 };
+          console.debug('prefetchNextTrack: full file fetched (initial returned 200)', { fileId, size: initialRes.buffer.byteLength });
+
+          // No background fetching needed; clear controller
+          if (prefetchControllers[fileId] === initialCtrl) delete prefetchControllers[fileId];
+          return;
         }
-        const blob = await res.blob();
-        console.log("Blob type:", blob.type, "Size:", blob.size);
 
-        if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
-        currentAudioUrl = URL.createObjectURL(blob);
-        player.src = currentAudioUrl;
+        // Store initial buffer and metadata
+        preloadedTracks[fileId] = { initialBuffer: initialRes.buffer, contentRange: initialRes.contentRange, status: initialRes.status };
+        console.debug('prefetchNextTrack: initial chunk fetched', { fileId, contentRange: initialRes.contentRange });
 
-        // Update UI
-        document.getElementById("track-title").textContent = fileName;
-        document.querySelector(".play-btn").textContent = "⏸";
-        // Use default album art for audio files in the bottom player
+        // Start background fetch of the remaining bytes to get the full file for seamless playback
+        (async () => {
+          try {
+            // Determine byte ranges from Content-Range header if possible
+            let start = null;
+            let total = null;
+            if (initialRes.contentRange) {
+              const m = initialRes.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
+              if (m) {
+                start = parseInt(m[2], 10) + 1;
+                total = m[3] === '*' ? null : parseInt(m[3], 10);
+              }
+            }
+
+            if (total !== null && start !== null && start <= (total - 1)) {
+              const bgCtrl = new AbortController();
+              prefetchControllers[fileId] = bgCtrl;
+              console.debug('prefetchNextTrack: background tail fetch', { fileId, start, end: total - 1 });
+              const tail = await fetchRange(url, start, total - 1, bgCtrl.signal);
+
+              // Combine initial buffer + tail into a single Blob and expose via object URL
+              const combined = new Blob([preloadedTracks[fileId].initialBuffer, tail.buffer], { type: (mimeType || 'audio/mpeg') });
+              const blobUrl = URL.createObjectURL(combined);
+
+              // Replace preloaded entry with full blob reference and free initialBuffer
+              try { delete preloadedTracks[fileId].initialBuffer; } catch (e) { }
+              preloadedTracks[fileId] = { fullBlobUrl: blobUrl, status: 200 };
+              console.debug('prefetchNextTrack: full blob assembled and ready', { fileId });
+            } else {
+              // Unknown total size: fall back to fetching the full file directly
+              console.debug('prefetchNextTrack: unknown total, falling back to full fetch', { fileId });
+              const bgCtrl = new AbortController();
+              prefetchControllers[fileId] = bgCtrl;
+              const fullRes = await driveFetch(url, { signal: bgCtrl.signal });
+              if (fullRes && fullRes.ok) {
+                const blob = await fullRes.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                preloadedTracks[fileId] = { fullBlobUrl: blobUrl, status: 200 };
+                console.debug('prefetchNextTrack: full fetch succeeded', { fileId });
+              }
+            }
+          } catch (e) {
+            if (e && e.name === 'AbortError') console.debug('prefetchNextTrack background aborted', { fileId });
+            else console.warn('prefetchNextTrack background failed', e);
+          } finally {
+            // Clear any background controller reference if it's the one we set
+            if (prefetchControllers[fileId] && typeof prefetchControllers[fileId].signal === 'undefined') {
+              // We set a controller object (legacy); clear it
+              delete prefetchControllers[fileId];
+            } else if (prefetchControllers[fileId] && typeof prefetchControllers[fileId].abort === 'function') {
+              // Clear if it's still a controller
+              delete prefetchControllers[fileId];
+            }
+          }
+        })();
+
+      } catch (e) {
+        if (e && e.name === 'AbortError') console.debug('prefetchNextTrack aborted (initial)', { fileId });
+        else console.warn('prefetchNextTrack failed', e);
+        if (prefetchControllers[fileId] === initialCtrl) delete prefetchControllers[fileId];
+      }
+    }
+
+    // Clear any preloaded entry and revoke objectURL if present
+    function clearPreloaded(fileId) {
+      const p = preloadedTracks[fileId];
+      if (!p) return;
+      if (p.fullBlobUrl) {
+        try { URL.revokeObjectURL(p.fullBlobUrl); } catch (e) { }
+      }
+      delete preloadedTracks[fileId];
+    }
+
+    /* ================= PLAY MUSIC ================= */
+    async function playSong(fileId, fileName) {
+      try {
+        // Show loading state early so user sees feedback
+        document.getElementById("track-title").textContent = "Loading...";
+
+        // Find and set current track index and mime type if available
+        currentTrackIndex = currentPlaylist.findIndex(song => song.id === fileId);
+        const songItem = currentPlaylist[currentTrackIndex] || allItems.find(s => s.id === fileId) || {};
+        const mimeType = songItem.mimeType || 'audio/mpeg';
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+        // Use default album art for the bottom player for songs (do not show thumbnails)
         setDefaultAlbumArt();
 
-        // Add event listeners
-        player.ontimeupdate = updateProgress;
-        player.onended = () => {
-          document.querySelector(".play-btn").textContent = "▶";
-          playNext();
-        };
-        player.onerror = (e) => {
-          console.error("Audio playback error:", e);
-          document.getElementById("track-title").textContent = "Error playing: " + fileName;
-        };
 
-        const playPromise = player.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error("Play failed:", error);
-            document.querySelector(".play-btn").textContent = "▶";
-          });
+        // Abort any previous streaming download
+        if (currentStreamController) {
+          try { currentStreamController.abort(); } catch (e) { /* ignore */ }
+          currentStreamController = null;
         }
-      };
+        // Clean up previous media source or object URL
+        if (currentAudioUrl) {
+          try { URL.revokeObjectURL(currentAudioUrl); } catch (e) { /* ignore */ }
+          currentAudioUrl = null;
+        }
+        if (currentMediaSource) {
+          try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
+          currentMediaSource = null;
+        }
 
-      // Helper to attempt a safe fallback to full download; guards against multiple attempts
-      let fallbackAttempted = false;
-      // Tracks whether we've already tried an aggressive head+tail init assembly for a file
-      const tailInitAttempted = {};
-      async function attemptFallback(reason) {
-        console.warn('attemptFallback:', reason);
-        if (fallbackAttempted) return;
-        fallbackAttempted = true;
-        showMessage('Playback error detected — falling back to full download', true);
+        const player = document.getElementById("player");
+
+
+
+        // Helper fallback to download full blob if streaming not supported or fails
+        const streamFallback = async () => {
+          const res = await driveFetch(url);
+          if (!res.ok) {
+            throw new Error(`Failed to fetch audio: ${res.status}`);
+          }
+          const blob = await res.blob();
+          console.log("Blob type:", blob.type, "Size:", blob.size);
+
+          if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
+          currentAudioUrl = URL.createObjectURL(blob);
+          player.src = currentAudioUrl;
+
+          // Update UI
+          document.getElementById("track-title").textContent = fileName;
+          document.querySelector(".play-btn").textContent = "⏸";
+          // Use default album art for audio files in the bottom player
+          setDefaultAlbumArt();
+
+          // Add event listeners
+          player.ontimeupdate = updateProgress;
+          player.onended = () => {
+            document.querySelector(".play-btn").textContent = "▶";
+            playNext();
+          };
+          player.onerror = (e) => {
+            console.error("Audio playback error:", e);
+            document.getElementById("track-title").textContent = "Error playing: " + fileName;
+          };
+
+          const playPromise = player.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+              console.error("Play failed:", error);
+              document.querySelector(".play-btn").textContent = "▶";
+            });
+          }
+        };
+
+        // Helper to attempt a safe fallback to full download; guards against multiple attempts
+        let fallbackAttempted = false;
+        // Tracks whether we've already tried an aggressive head+tail init assembly for a file
+        const tailInitAttempted = {};
+        async function attemptFallback(reason) {
+          console.warn('attemptFallback:', reason);
+          if (fallbackAttempted) return;
+          fallbackAttempted = true;
+          showMessage('Playback error detected — falling back to full download', true);
+          try {
+            if (currentStreamController) {
+              try { currentStreamController.abort(); } catch (e) { }
+              currentStreamController = null;
+            }
+            if (currentMediaSource) {
+              try { currentMediaSource.endOfStream(); } catch (e) { }
+              currentMediaSource = null;
+            }
+          } catch (e) { console.debug('attemptFallback cleanup error', e); }
+
+          try { await streamFallback(); } catch (e) { console.error('Fallback failed', e); }
+        }
+
+        // Try streaming via MediaSource for faster startup, fallback to full download when not available
         try {
-          if (currentStreamController) {
-            try { currentStreamController.abort(); } catch (e) {}
-            currentStreamController = null;
-          }
-          if (currentMediaSource) {
-            try { currentMediaSource.endOfStream(); } catch (e) {}
-            currentMediaSource = null;
-          }
-        } catch (e) { console.debug('attemptFallback cleanup error', e); }
+          if (window.MediaSource) {
+            let msType = mimeType;
+            // Try common codec hint for mp3 if necessary
+            if (!MediaSource.isTypeSupported(msType) && mimeType === 'audio/mpeg' && MediaSource.isTypeSupported('audio/mpeg; codecs="mp3"')) {
+              msType = 'audio/mpeg; codecs="mp3"';
+            }
 
-        try { await streamFallback(); } catch (e) { console.error('Fallback failed', e); }
-      }
+            if (MediaSource.isTypeSupported(msType)) {
+              currentMediaSource = new MediaSource();
+              player.src = URL.createObjectURL(currentMediaSource);
+              currentStreamController = new AbortController();
+              const signal = currentStreamController.signal;
 
-      // Try streaming via MediaSource for faster startup, fallback to full download when not available
-      try {
-        if (window.MediaSource) {
-          let msType = mimeType;
-          // Try common codec hint for mp3 if necessary
-          if (!MediaSource.isTypeSupported(msType) && mimeType === 'audio/mpeg' && MediaSource.isTypeSupported('audio/mpeg; codecs="mp3"')) {
-            msType = 'audio/mpeg; codecs="mp3"';
-          }
-
-          if (MediaSource.isTypeSupported(msType)) {
-            currentMediaSource = new MediaSource();
-            player.src = URL.createObjectURL(currentMediaSource);
-            currentStreamController = new AbortController();
-            const signal = currentStreamController.signal;
-
-            currentMediaSource.addEventListener('sourceopen', async function onOpen() {
-              currentMediaSource.removeEventListener('sourceopen', onOpen);
-              let sourceBuffer;
-              try {
-                sourceBuffer = currentMediaSource.addSourceBuffer(msType);
-                // Listen for SourceBuffer-level errors and attempt a fallback
-                sourceBuffer.addEventListener('error', async (ev) => {
-                  console.error('SourceBuffer error', ev);
-                  await attemptFallback('SourceBuffer error');
-                });
-                // Listen for MediaSource-level errors
-                currentMediaSource.addEventListener('error', async (ev) => {
-                  console.error('MediaSource error', ev);
-                  await attemptFallback('MediaSource error');
-                });
-              } catch (e) {
-                console.warn('SourceBuffer creation failed, falling back', e);
-                await streamFallback();
-                return;
-              }
-
-              try {
-                // Range-based streaming: request a small initial chunk to start playback quickly,
-                // then fetch subsequent ranges and append them to the SourceBuffer.
-                let INITIAL_CHUNK = 128 * 1024; // 128KB initial chunk
-                // Use a larger initial fetch for MP4/M4A containers to increase chances of getting ftyp/moov
-                if (mimeType && (mimeType.includes('x-m4a') || mimeType.includes('mp4') || (fileName && fileName.toLowerCase().endsWith('.m4a')))) {
-                  INITIAL_CHUNK = 1024 * 1024; // 1MB
-                  console.debug('Using larger INITIAL_CHUNK for mp4/m4a', { fileId, INITIAL_CHUNK });
+              currentMediaSource.addEventListener('sourceopen', async function onOpen() {
+                currentMediaSource.removeEventListener('sourceopen', onOpen);
+                let sourceBuffer;
+                try {
+                  sourceBuffer = currentMediaSource.addSourceBuffer(msType);
+                  // Listen for SourceBuffer-level errors and attempt a fallback
+                  sourceBuffer.addEventListener('error', async (ev) => {
+                    console.error('SourceBuffer error', ev);
+                    await attemptFallback('SourceBuffer error');
+                  });
+                  // Listen for MediaSource-level errors
+                  currentMediaSource.addEventListener('error', async (ev) => {
+                    console.error('MediaSource error', ev);
+                    await attemptFallback('MediaSource error');
+                  });
+                } catch (e) {
+                  console.warn('SourceBuffer creation failed, falling back', e);
+                  await streamFallback();
+                  return;
                 }
-                const CHUNK_SIZE = 256 * 1024; // 256KB per subsequent chunk
 
-                // Fetch initial range (diagnostics enabled) - use preloaded buffer if available
-                let initial;
-                const pre = preloadedTracks[fileId];
-                if (pre) {
-                  if (pre.fullBlobUrl) {
-                    // We have the full file available from prefetch — use blob playback immediately
-                    console.debug('Using preloaded full blob for', fileId);
+                try {
+                  // Range-based streaming: request a small initial chunk to start playback quickly,
+                  // then fetch subsequent ranges and append them to the SourceBuffer.
+                  let INITIAL_CHUNK = 128 * 1024; // 128KB initial chunk
+                  // Use a larger initial fetch for MP4/M4A containers to increase chances of getting ftyp/moov
+                  if (mimeType && (mimeType.includes('x-m4a') || mimeType.includes('mp4') || (fileName && fileName.toLowerCase().endsWith('.m4a')))) {
+                    INITIAL_CHUNK = 1024 * 1024; // 1MB
+                    console.debug('Using larger INITIAL_CHUNK for mp4/m4a', { fileId, INITIAL_CHUNK });
+                  }
+                  const CHUNK_SIZE = 256 * 1024; // 256KB per subsequent chunk
+
+                  // Fetch initial range (diagnostics enabled) - use preloaded buffer if available
+                  let initial;
+                  const pre = preloadedTracks[fileId];
+                  if (pre) {
+                    if (pre.fullBlobUrl) {
+                      // We have the full file available from prefetch — use blob playback immediately
+                      console.debug('Using preloaded full blob for', fileId);
+                      if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
+                      currentAudioUrl = pre.fullBlobUrl;
+                      player.src = currentAudioUrl;
+
+                      // Update UI and handlers (similar to fallback)
+                      document.getElementById("track-title").textContent = fileName;
+                      document.querySelector(".play-btn").textContent = "⏸";
+                      player.ontimeupdate = updateProgress;
+                      player.onended = () => { document.querySelector('.play-btn').textContent = '▶'; playNext(); };
+                      player.onerror = async (e) => {
+                        console.error("Audio playback error (preloaded full blob):", e, player.error);
+                        document.getElementById("track-title").textContent = "Error playing: " + fileName;
+                        await attemptFallback('preloaded full-blob playback error');
+                      };
+
+                      const playPromise = player.play();
+                      if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                          console.error("Play failed:", error);
+                          document.querySelector(".play-btn").textContent = "▶";
+                        });
+                      }
+
+                      // Clear preloaded entry (we're now using it as currentAudioUrl which will be revoked when replaced)
+                      try { delete preloadedTracks[fileId]; } catch (e) { }
+                      return;
+                    }
+
+                    if (pre.initialBuffer) {
+                      initial = { buffer: pre.initialBuffer, contentRange: pre.contentRange, status: pre.status };
+                      console.debug('Using preloaded initial buffer for', fileId, { contentRange: pre.contentRange });
+                    }
+                  }
+
+                  if (!initial) {
+                    const tFetchStart = performance.now();
+                    initial = await fetchRange(url, 0, INITIAL_CHUNK - 1, signal);
+                    const tFetchEnd = performance.now();
+                    console.debug('initialFetch', { fileId, start: 0, end: INITIAL_CHUNK - 1, status: initial.status, contentRange: initial.contentRange, fetchMs: initial.elapsed || (tFetchEnd - tFetchStart) });
+                  }
+
+                  // If server returned full file (status 200), treat as blob fallback
+                  if (initial.status === 200) {
+                    console.debug('Initial range returned full file (200) - using blob fallback', { size: initial.buffer.byteLength });
+                    const blob = new Blob([initial.buffer], { type: mimeType });
                     if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
-                    currentAudioUrl = pre.fullBlobUrl;
+                    currentAudioUrl = URL.createObjectURL(blob);
                     player.src = currentAudioUrl;
 
                     // Update UI and handlers (similar to fallback)
                     document.getElementById("track-title").textContent = fileName;
                     document.querySelector(".play-btn").textContent = "⏸";
                     player.ontimeupdate = updateProgress;
-                    player.onended = () => { document.querySelector('.play-btn').textContent = '▶'; playNext(); };
-                    player.onerror = async (e) => {
-                      console.error("Audio playback error (preloaded full blob):", e, player.error);
-                      document.getElementById("track-title").textContent = "Error playing: " + fileName;
-                      await attemptFallback('preloaded full-blob playback error');
-                    };
+                    player.onended = () => { document.querySelector(".play-btn").textContent = "▶"; playNext(); };
+                    player.onerror = (e) => { console.error("Audio playback error:", e); document.getElementById("track-title").textContent = "Error playing: " + fileName; };
 
                     const playPromise = player.play();
                     if (playPromise !== undefined) {
@@ -1530,315 +1861,274 @@
                         document.querySelector(".play-btn").textContent = "▶";
                       });
                     }
-
-                    // Clear preloaded entry (we're now using it as currentAudioUrl which will be revoked when replaced)
-                    try { delete preloadedTracks[fileId]; } catch (e) {}
                     return;
                   }
 
-                  if (pre.initialBuffer) {
-                    initial = { buffer: pre.initialBuffer, contentRange: pre.contentRange, status: pre.status };
-                    console.debug('Using preloaded initial buffer for', fileId, { contentRange: pre.contentRange });
-                  }
-                }
+                  // If we didn't find an init segment in the initial buffer, try to fetch the tail and assemble one
+                  if (!findBox(initial.buffer, 'moov')) {
+                    try {
+                      const tail = await fetchTail(url, Math.max(256 * 1024, INITIAL_CHUNK));
+                      const initSeg = await buildInitSegment(initial.buffer, tail.buffer);
+                      if (initSeg) {
+                        console.debug('Constructed init segment from head+tail');
 
-                if (!initial) {
-                  const tFetchStart = performance.now();
-                  initial = await fetchRange(url, 0, INITIAL_CHUNK - 1, signal);
-                  const tFetchEnd = performance.now();
-                  console.debug('initialFetch', { fileId, start: 0, end: INITIAL_CHUNK - 1, status: initial.status, contentRange: initial.contentRange, fetchMs: initial.elapsed || (tFetchEnd - tFetchStart) });
-                }
+                        // Append init segment first
+                        await appendBufferSafe(sourceBuffer, initSeg);
 
-                // If server returned full file (status 200), treat as blob fallback
-                if (initial.status === 200) {
-                  console.debug('Initial range returned full file (200) - using blob fallback', { size: initial.buffer.byteLength });
-                  const blob = new Blob([initial.buffer], { type: mimeType });
-                  if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
-                  currentAudioUrl = URL.createObjectURL(blob);
-                  player.src = currentAudioUrl;
+                        // Append the initial buffer but skip ftyp if we already included it
+                        const ftyp = findBox(initial.buffer, 'ftyp');
+                        let dataToAppend = initial.buffer;
+                        if (ftyp) {
+                          const skip = ftyp.pos + ftyp.size;
+                          dataToAppend = initial.buffer.slice(skip);
+                        }
 
-                  // Update UI and handlers (similar to fallback)
-                  document.getElementById("track-title").textContent = fileName;
-                  document.querySelector(".play-btn").textContent = "⏸";
-                  player.ontimeupdate = updateProgress;
-                  player.onended = () => { document.querySelector(".play-btn").textContent = "▶"; playNext(); };
-                  player.onerror = (e) => { console.error("Audio playback error:", e); document.getElementById("track-title").textContent = "Error playing: " + fileName; };
+                        await appendBufferSafe(sourceBuffer, dataToAppend);
 
-                  const playPromise = player.play();
-                  if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                      console.error("Play failed:", error);
-                      document.querySelector(".play-btn").textContent = "▶";
-                    });
-                  }
-                  return;
-                }
+                        // If we used a prefetched initial buffer, clear it to free memory
+                        try { if (preloadedTracks[fileId] && preloadedTracks[fileId].initialBuffer) delete preloadedTracks[fileId]; } catch (e) { /* ignore */ }
 
-                // If we didn't find an init segment in the initial buffer, try to fetch the tail and assemble one
-                if (!findBox(initial.buffer, 'moov')) {
-                  try {
-                    const tail = await fetchTail(url, Math.max(256*1024, INITIAL_CHUNK));
-                    const initSeg = await buildInitSegment(initial.buffer, tail.buffer);
-                    if (initSeg) {
-                      console.debug('Constructed init segment from head+tail');
+                        // Start playback as soon as we have enough buffer; measure time to 'playing'
+                        if (player.paused && player.readyState >= 2) {
+                          const onPlaying = () => {
+                            console.debug('player playing', { sinceFetchMs: performance.now() - tFetchStart, readyState: player.readyState });
+                            player.removeEventListener('playing', onPlaying);
+                          };
+                          player.addEventListener('playing', onPlaying);
+                          try { await player.play(); document.querySelector('.play-btn').textContent = '⏸'; } catch (e) { console.error('Play failed after init assemble', e); player.removeEventListener('playing', onPlaying); }
+                        }
 
-                      // Append init segment first
-                      await appendBufferSafe(sourceBuffer, initSeg);
+                        // Continue fetching remaining ranges sequentially starting after the appended initial range
+                        let position = (initial.contentRange && initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/) ? (parseInt(initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/)[2], 10) + 1) : INITIAL_CHUNK);
 
-                      // Append the initial buffer but skip ftyp if we already included it
-                      const ftyp = findBox(initial.buffer, 'ftyp');
-                      let dataToAppend = initial.buffer;
-                      if (ftyp) {
-                        const skip = ftyp.pos + ftyp.size;
-                        dataToAppend = initial.buffer.slice(skip);
-                      }
+                        while (true) {
+                          if (signal && signal.aborted) break;
+                          const end = position + CHUNK_SIZE - 1;
+                          const chunk = await fetchRange(url, position, end, signal);
+                          await appendBufferSafe(sourceBuffer, chunk.buffer);
 
-                      await appendBufferSafe(sourceBuffer, dataToAppend);
-
-                      // If we used a prefetched initial buffer, clear it to free memory
-                      try { if (preloadedTracks[fileId] && preloadedTracks[fileId].initialBuffer) delete preloadedTracks[fileId]; } catch (e) { /* ignore */ }
-
-                      // Start playback as soon as we have enough buffer; measure time to 'playing'
-                      if (player.paused && player.readyState >= 2) {
-                        const onPlaying = () => {
-                          console.debug('player playing', { sinceFetchMs: performance.now() - tFetchStart, readyState: player.readyState });
-                          player.removeEventListener('playing', onPlaying);
-                        };
-                        player.addEventListener('playing', onPlaying);
-                        try { await player.play(); document.querySelector('.play-btn').textContent = '⏸'; } catch (e) { console.error('Play failed after init assemble', e); player.removeEventListener('playing', onPlaying); }
-                      }
-
-                      // Continue fetching remaining ranges sequentially starting after the appended initial range
-                      let position = (initial.contentRange && initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/) ? (parseInt(initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/)[2], 10) + 1) : INITIAL_CHUNK);
-
-                      while (true) {
-                        if (signal && signal.aborted) break;
-                        const end = position + CHUNK_SIZE - 1;
-                        const chunk = await fetchRange(url, position, end, signal);
-                        await appendBufferSafe(sourceBuffer, chunk.buffer);
-
-                        if (chunk.status === 200) break;
-                        const cr = chunk.contentRange;
-                        if (cr) {
-                          const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                          if (m) {
-                            const chunkEnd = parseInt(m[2], 10);
-                            const total = m[3] === '*' ? null : parseInt(m[3], 10);
-                            position = chunkEnd + 1;
-                            if (total !== null && position > total) break;
+                          if (chunk.status === 200) break;
+                          const cr = chunk.contentRange;
+                          if (cr) {
+                            const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
+                            if (m) {
+                              const chunkEnd = parseInt(m[2], 10);
+                              const total = m[3] === '*' ? null : parseInt(m[3], 10);
+                              position = chunkEnd + 1;
+                              if (total !== null && position > total) break;
+                            } else {
+                              position += chunk.buffer.byteLength;
+                            }
                           } else {
+                            if (chunk.buffer.byteLength < CHUNK_SIZE) break;
                             position += chunk.buffer.byteLength;
                           }
-                        } else {
-                          if (chunk.buffer.byteLength < CHUNK_SIZE) break;
-                          position += chunk.buffer.byteLength;
                         }
+
+                        try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
+
+                        // Update UI and handlers
+                        document.getElementById("track-title").textContent = fileName;
+                        document.querySelector(".play-btn").textContent = "⏸";
+                        player.ontimeupdate = updateProgress;
+                        player.onended = () => { document.querySelector('.play-btn').textContent = '▶'; playNext(); };
+                        player.onerror = async (e) => { console.error('Audio playback error after assembled init', e); await attemptFallback('playback after init assemble'); };
+
+                        return;
+                      } else {
+                        console.debug('Could not assemble init segment from head+tail — falling back to standard streaming');
+                      }
+                    } catch (e) {
+                      console.warn('Head+tail assembly failed', e);
+                    }
+                  }
+
+                  // Append initial chunk to buffer and measure append time
+                  const tAppendStart = performance.now();
+                  await appendBufferSafe(sourceBuffer, initial.buffer);
+                  const tAppendEnd = performance.now();
+                  console.debug('appendInitial', { appendMs: (tAppendEnd - tAppendStart), readyState: player.readyState, bufferedLength: player.buffered ? player.buffered.length : 0 });
+
+                  // If we used a prefetched initial buffer, clear it to free memory
+                  try { if (preloadedTracks[fileId] && preloadedTracks[fileId].initialBuffer) delete preloadedTracks[fileId]; } catch (e) { /* ignore */ }
+
+                  // Start playback as soon as we have enough buffer; measure time to 'playing'
+                  if (player.paused && player.readyState >= 2) {
+                    const onPlaying = () => {
+                      console.debug('player playing', { sinceFetchMs: performance.now() - tFetchStart, readyState: player.readyState });
+                      player.removeEventListener('playing', onPlaying);
+                    };
+                    player.addEventListener('playing', onPlaying);
+                    try { await player.play(); document.querySelector('.play-btn').textContent = '⏸'; } catch (e) { console.error('Play failed after initial chunk', e); player.removeEventListener('playing', onPlaying); }
+                  }
+
+                  // Determine total size if available from Content-Range header (format: bytes start-end/total)
+                  let totalBytes = null;
+                  if (initial.contentRange) {
+                    const m = initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
+                    if (m) {
+                      totalBytes = m[3] === '*' ? null : parseInt(m[3], 10);
+                    }
+                  }
+
+                  // Continue fetching remaining ranges with concurrency to reduce latency
+                  // Increase chunk sizes for fewer requests: use 1MB initial and 512KB chunks
+                  const CONCURRENT_CHUNKS = 3;
+                  const INIT_CHUNK_OVERRIDE = 1024 * 1024; // 1MB
+                  const CHUNK_SIZE_OVERRIDE = 512 * 1024; // 512KB
+                  const START_POS = (initial.contentRange && initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/) ? (parseInt(initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/)[2], 10) + 1) : INITIAL_CHUNK);
+                  let position = START_POS;
+
+                  // If the server's chunk size is small and we requested a larger initial prefetch, adjust
+                  const CHUNK = Math.max(CHUNK_SIZE, CHUNK_SIZE_OVERRIDE);
+
+                  // Try metadata if we don't have totalBytes yet
+                  if (!totalBytes) {
+                    try {
+                      const metaSize = await getFileSizeFromDrive(fileId);
+                      if (metaSize) {
+                        totalBytes = metaSize;
+                        console.debug('Using Drive metadata size', { fileId, totalBytes });
+                      }
+                    } catch (e) {
+                      console.debug('Drive metadata size probe failed', e);
+                    }
+                  }
+
+                  // If position is already beyond total (rare but possible), adjust or stop
+                  if (totalBytes !== null && position > totalBytes) {
+                    console.debug('Position beyond totalBytes; nothing to enqueue', { position, totalBytes });
+                  }
+
+                  // A map of start -> Promise of fetch result
+                  const pending = new Map();
+                  let lastEnqueued = position - 1;
+
+                  async function enqueue(start) {
+                    if (signal && signal.aborted) return;
+                    // guard against enqueuing beyond known total
+                    if (totalBytes !== null && start > totalBytes) return;
+                    const end = start + CHUNK - 1;
+                    const p = fetchRange(url, start, end, signal).then(r => ({ start, res: r })).catch(err => { throw err; });
+                    pending.set(start, p);
+                    lastEnqueued = Math.max(lastEnqueued, start);
+                    return p;
+                  }
+
+                  // Seed initial concurrent requests (skip those beyond known total)
+                  for (let i = 0; i < CONCURRENT_CHUNKS; i++) {
+                    const s = position + i * CHUNK;
+                    if (totalBytes !== null && s > totalBytes) break;
+                    enqueue(s).catch(e => console.debug('enqueue error', e));
+                    lastEnqueued = Math.max(lastEnqueued, s);
+                  }
+
+                  // Helper to parse range end from Content-Range header
+                  const parseEnd = (cr, bufLen) => {
+                    if (!cr) return bufLen;
+                    const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
+                    if (m) return parseInt(m[2], 10);
+                    return bufLen;
+                  };
+
+                  // Append in-order as chunks arrive (wait for each start position to be available)
+                  let appendPos = position;
+                  let recent416 = 0;
+                  while (true) {
+                    if (signal && signal.aborted) break;
+
+                    // Wait for the next chunk at appendPos to be available
+                    let p = pending.get(appendPos);
+                    if (!p) {
+                      // Try to enqueue it if not present
+                      if (totalBytes === null || appendPos <= totalBytes) {
+                        await enqueue(appendPos).catch(e => { console.debug('enqueue failed', e); });
+                        p = pending.get(appendPos);
+                      } else break;
+                    }
+
+                    let obj;
+                    try {
+                      obj = await p; // { start, res }
+                    } catch (e) {
+                      console.error('Chunk fetch failed', e);
+                      await attemptFallback('chunk fetch failed');
+                      break;
+                    }
+
+                    const chunk = obj.res;
+
+                    // If server returned 416 for this chunk, update total and stop
+                    if (chunk.status === 416) {
+                      recent416++;
+                      console.warn('Chunk fetch returned 416; treating as EOF', { start: obj.start, total: chunk.total, contentRange: chunk.contentRange, recent416 });
+                      if (chunk.total) totalBytes = chunk.total;
+
+                      // If we see repeated 416s, proactively probe metadata to get a reliable totalBytes
+                      if (recent416 >= 3 && (!totalBytes || totalBytes === null)) {
+                        try {
+                          const meta = await getFileSizeFromDrive(fileId);
+                          if (meta) {
+                            totalBytes = meta;
+                            console.debug('Recovered totalBytes from Drive after repeated 416s', { totalBytes });
+                          }
+                        } catch (e) { console.debug('Metadata probe after 416s failed', e); }
                       }
 
-                      try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
+                      break;
+                    }
+                    // Append this chunk
+                    try {
+                      await appendBufferSafe(sourceBuffer, chunk.buffer);
+                    } catch (e) {
+                      console.error('Append failed for chunk', e);
+                      await attemptFallback('append failed');
+                      break;
+                    }
 
-                      // Update UI and handlers
-                      document.getElementById("track-title").textContent = fileName;
-                      document.querySelector(".play-btn").textContent = "⏸";
-                      player.ontimeupdate = updateProgress;
-                      player.onended = () => { document.querySelector('.play-btn').textContent = '▶'; playNext(); };
-                      player.onerror = async (e) => { console.error('Audio playback error after assembled init', e); await attemptFallback('playback after init assemble'); };
-
-                      return;
+                    // Advance appendPos based on returned content-range
+                    if (chunk.status === 200) {
+                      break; // full file or end reached
+                    }
+                    const cr = chunk.contentRange;
+                    if (cr) {
+                      const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
+                      if (m) {
+                        const chunkEnd = parseInt(m[2], 10);
+                        const total = m[3] === '*' ? null : parseInt(m[3], 10);
+                        appendPos = chunkEnd + 1;
+                        if (total !== null) totalBytes = total;
+                        if (total !== null && appendPos > total) break;
+                      } else {
+                        appendPos += chunk.buffer.byteLength;
+                      }
                     } else {
-                      console.debug('Could not assemble init segment from head+tail — falling back to standard streaming');
-                    }
-                  } catch (e) {
-                    console.warn('Head+tail assembly failed', e);
-                  }
-                }
-
-                // Append initial chunk to buffer and measure append time
-                const tAppendStart = performance.now();
-                await appendBufferSafe(sourceBuffer, initial.buffer);
-                const tAppendEnd = performance.now();
-                console.debug('appendInitial', { appendMs: (tAppendEnd - tAppendStart), readyState: player.readyState, bufferedLength: player.buffered ? player.buffered.length : 0 });
-
-                // If we used a prefetched initial buffer, clear it to free memory
-                try { if (preloadedTracks[fileId] && preloadedTracks[fileId].initialBuffer) delete preloadedTracks[fileId]; } catch (e) { /* ignore */ }
-
-                // Start playback as soon as we have enough buffer; measure time to 'playing'
-                if (player.paused && player.readyState >= 2) {
-                  const onPlaying = () => {
-                    console.debug('player playing', { sinceFetchMs: performance.now() - tFetchStart, readyState: player.readyState });
-                    player.removeEventListener('playing', onPlaying);
-                  };
-                  player.addEventListener('playing', onPlaying);
-                  try { await player.play(); document.querySelector('.play-btn').textContent = '⏸'; } catch (e) { console.error('Play failed after initial chunk', e); player.removeEventListener('playing', onPlaying); }
-                }
-
-                // Determine total size if available from Content-Range header (format: bytes start-end/total)
-                let totalBytes = null;
-                if (initial.contentRange) {
-                  const m = initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                  if (m) {
-                    totalBytes = m[3] === '*' ? null : parseInt(m[3], 10);
-                  }
-                }
-
-                // Continue fetching remaining ranges with concurrency to reduce latency
-                // Increase chunk sizes for fewer requests: use 1MB initial and 512KB chunks
-                const CONCURRENT_CHUNKS = 3;
-                const INIT_CHUNK_OVERRIDE = 1024 * 1024; // 1MB
-                const CHUNK_SIZE_OVERRIDE = 512 * 1024; // 512KB
-                const START_POS = (initial.contentRange && initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/) ? (parseInt(initial.contentRange.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/)[2], 10) + 1) : INITIAL_CHUNK);
-                let position = START_POS;
-
-                // If the server's chunk size is small and we requested a larger initial prefetch, adjust
-                const CHUNK = Math.max(CHUNK_SIZE, CHUNK_SIZE_OVERRIDE);
-
-                // Try metadata if we don't have totalBytes yet
-                if (!totalBytes) {
-                  try {
-                    const metaSize = await getFileSizeFromDrive(fileId);
-                    if (metaSize) {
-                      totalBytes = metaSize;
-                      console.debug('Using Drive metadata size', { fileId, totalBytes });
-                    }
-                  } catch (e) {
-                    console.debug('Drive metadata size probe failed', e);
-                  }
-                }
-
-                // If position is already beyond total (rare but possible), adjust or stop
-                if (totalBytes !== null && position > totalBytes) {
-                  console.debug('Position beyond totalBytes; nothing to enqueue', { position, totalBytes });
-                }
-
-                // A map of start -> Promise of fetch result
-                const pending = new Map();
-                let lastEnqueued = position - 1;
-
-                async function enqueue(start) {
-                  if (signal && signal.aborted) return;
-                  // guard against enqueuing beyond known total
-                  if (totalBytes !== null && start > totalBytes) return;
-                  const end = start + CHUNK - 1;
-                  const p = fetchRange(url, start, end, signal).then(r => ({ start, res: r })).catch(err => { throw err; });
-                  pending.set(start, p);
-                  lastEnqueued = Math.max(lastEnqueued, start);
-                  return p;
-                }
-
-                // Seed initial concurrent requests (skip those beyond known total)
-                for (let i = 0; i < CONCURRENT_CHUNKS; i++) {
-                  const s = position + i * CHUNK;
-                  if (totalBytes !== null && s > totalBytes) break;
-                  enqueue(s).catch(e => console.debug('enqueue error', e));
-                  lastEnqueued = Math.max(lastEnqueued, s);
-                }
-
-                // Helper to parse range end from Content-Range header
-                const parseEnd = (cr, bufLen) => {
-                  if (!cr) return bufLen;
-                  const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                  if (m) return parseInt(m[2], 10);
-                  return bufLen;
-                };
-
-                // Append in-order as chunks arrive (wait for each start position to be available)
-                let appendPos = position;
-                let recent416 = 0;
-                while (true) {
-                  if (signal && signal.aborted) break;
-
-                  // Wait for the next chunk at appendPos to be available
-                  let p = pending.get(appendPos);
-                  if (!p) {
-                    // Try to enqueue it if not present
-                    if (totalBytes === null || appendPos <= totalBytes) {
-                      await enqueue(appendPos).catch(e => { console.debug('enqueue failed', e); });
-                      p = pending.get(appendPos);
-                    } else break;
-                  }
-
-                  let obj;
-                  try {
-                    obj = await p; // { start, res }
-                  } catch (e) {
-                    console.error('Chunk fetch failed', e);
-                    await attemptFallback('chunk fetch failed');
-                    break;
-                  }
-
-                  const chunk = obj.res;
-
-                  // If server returned 416 for this chunk, update total and stop
-                  if (chunk.status === 416) {
-                    recent416++;
-                    console.warn('Chunk fetch returned 416; treating as EOF', { start: obj.start, total: chunk.total, contentRange: chunk.contentRange, recent416 });
-                    if (chunk.total) totalBytes = chunk.total;
-
-                    // If we see repeated 416s, proactively probe metadata to get a reliable totalBytes
-                    if (recent416 >= 3 && (!totalBytes || totalBytes === null)) {
-                      try {
-                        const meta = await getFileSizeFromDrive(fileId);
-                        if (meta) {
-                          totalBytes = meta;
-                          console.debug('Recovered totalBytes from Drive after repeated 416s', { totalBytes });
-                        }
-                      } catch (e) { console.debug('Metadata probe after 416s failed', e); }
-                    }
-
-                    break;
-                  }
-                  // Append this chunk
-                  try {
-                    await appendBufferSafe(sourceBuffer, chunk.buffer);
-                  } catch (e) {
-                    console.error('Append failed for chunk', e);
-                    await attemptFallback('append failed');
-                    break;
-                  }
-
-                  // Advance appendPos based on returned content-range
-                  if (chunk.status === 200) {
-                    break; // full file or end reached
-                  }
-                  const cr = chunk.contentRange;
-                  if (cr) {
-                    const m = cr.match(/bytes\s+(\d+)-(\d+)\/(\d+|\*)/);
-                    if (m) {
-                      const chunkEnd = parseInt(m[2], 10);
-                      const total = m[3] === '*' ? null : parseInt(m[3], 10);
-                      appendPos = chunkEnd + 1;
-                      if (total !== null) totalBytes = total;
-                      if (total !== null && appendPos > total) break;
-                    } else {
+                      if (chunk.buffer.byteLength < CHUNK) break;
                       appendPos += chunk.buffer.byteLength;
                     }
-                  } else {
-                    if (chunk.buffer.byteLength < CHUNK) break;
-                    appendPos += chunk.buffer.byteLength;
+
+                    // Clean up pending entry
+                    pending.delete(obj.start);
+
+                    // Enqueue more to keep concurrency
+                    while ((lastEnqueued - appendPos) / CHUNK < CONCURRENT_CHUNKS) {
+                      const nextStart = lastEnqueued + CHUNK;
+                      if (totalBytes !== null && nextStart > totalBytes) break;
+                      enqueue(nextStart).catch(e => console.debug('enqueue error', e));
+                      lastEnqueued = Math.max(lastEnqueued, nextStart);
+                    }
+
+                    // Stop condition
+                    if (totalBytes !== null && appendPos > totalBytes) break;
                   }
 
-                  // Clean up pending entry
-                  pending.delete(obj.start);
-
-                  // Enqueue more to keep concurrency
-                  while ((lastEnqueued - appendPos) / CHUNK < CONCURRENT_CHUNKS) {
-                    const nextStart = lastEnqueued + CHUNK;
-                    if (totalBytes !== null && nextStart > totalBytes) break;
-                    enqueue(nextStart).catch(e => console.debug('enqueue error', e));
-                    lastEnqueued = Math.max(lastEnqueued, nextStart);
-                  }
-
-                  // Stop condition
-                  if (totalBytes !== null && appendPos > totalBytes) break;
+                  try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
+                } catch (err) {
+                  if (err.name === 'AbortError') return; // aborted intentionally
+                  console.error('Streaming failed', err);
+                  showMessage('Streaming failed, falling back', true);
+                  await streamFallback();
                 }
-
-                try { currentMediaSource.endOfStream(); } catch (e) { /* ignore */ }
-              } catch (err) {
-                if (err.name === 'AbortError') return; // aborted intentionally
-                console.error('Streaming failed', err);
-                showMessage('Streaming failed, falling back', true);
-                await streamFallback();
-              }
 
                 // Update UI right away
                 document.getElementById("track-title").textContent = fileName;
@@ -1876,7 +2166,7 @@
                         }
                       }
                       if (initSeg) {
-                        try { sourceBuffer.abort(); } catch (e) {}
+                        try { sourceBuffer.abort(); } catch (e) { }
 
                         // Ensure sourceBuffer is still attached to the current MediaSource
                         if (!currentMediaSource || !sourceBuffer || Array.prototype.indexOf.call(currentMediaSource.sourceBuffers, sourceBuffer) === -1) {
@@ -1910,213 +2200,214 @@
                   }
                   await attemptFallback('streaming playback error');
                 };
-            });
+              });
 
-            // Done setting up streaming path — return so fallback download is not started in parallel
-            return;
+              // Done setting up streaming path — return so fallback download is not started in parallel
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn('MediaSource streaming not available or failed:', err);
+        }
+
+        // If streaming wasn't used or failed, fallback to full download
+        await streamFallback();
+      } catch (error) {
+        console.error("Error loading song:", error);
+        document.getElementById("track-title").textContent = "Failed to load: " + fileName;
+        showMessage(error.message || 'Failed to load track', true);
+      }
+    }
+
+    /* ================= PLAYER CONTROLS ================= */
+    function togglePlay() {
+      const player = document.getElementById("player");
+      const btn = document.querySelector(".play-btn");
+
+      if (player.paused) {
+        player.play();
+        btn.textContent = "⏸";
+      } else {
+        player.pause();
+        btn.textContent = "▶";
+      }
+    }
+
+    function playNext() {
+      if (currentPlaylist.length === 0) return;
+
+      // Move to next track, loop back to start if at end
+      currentTrackIndex = (currentTrackIndex + 1) % currentPlaylist.length;
+      const nextSong = currentPlaylist[currentTrackIndex];
+      playSong(nextSong.id, nextSong.name);
+    }
+
+    function playPrevious() {
+      if (currentPlaylist.length === 0) return;
+
+      // Move to previous track, loop to end if at start
+      currentTrackIndex = (currentTrackIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+      const prevSong = currentPlaylist[currentTrackIndex];
+      playSong(prevSong.id, prevSong.name);
+    }
+
+    function updateProgress() {
+      const player = document.getElementById("player");
+      const fill = document.getElementById("progress-fill");
+      const currentTime = document.getElementById("current-time");
+      const totalTime = document.getElementById("total-time");
+
+      if (!player.duration) return;
+
+      const percent = (player.currentTime / player.duration) * 100;
+      fill.style.width = percent + "%";
+
+      currentTime.textContent = formatTime(player.currentTime);
+      totalTime.textContent = formatTime(player.duration);
+
+      // Trigger prefetch for the next track when within threshold
+      try {
+        const remaining = player.duration - player.currentTime;
+        if (remaining <= PREFETCH_THRESHOLD && currentPlaylist && currentPlaylist.length > 0) {
+          const nextIndex = (currentTrackIndex + 1) % currentPlaylist.length;
+          const nextSong = currentPlaylist[nextIndex];
+          if (nextSong && !preloadedTracks[nextSong.id] && !prefetchControllers[nextSong.id]) {
+            console.debug('updateProgress: prefetching next song', { nextId: nextSong.id, remaining });
+            prefetchNextTrack(nextSong.id, nextSong.name, nextSong.mimeType);
           }
         }
-      } catch (err) {
-        console.warn('MediaSource streaming not available or failed:', err);
-      }
-
-      // If streaming wasn't used or failed, fallback to full download
-      await streamFallback();
-    } catch (error) {
-      console.error("Error loading song:", error);
-      document.getElementById("track-title").textContent = "Failed to load: " + fileName;
-      showMessage(error.message || 'Failed to load track', true);
+      } catch (e) { console.debug('updateProgress prefetch check failed', e); }
     }
-  }
 
-  /* ================= PLAYER CONTROLS ================= */
-  function togglePlay() {
-    const player = document.getElementById("player");
-    const btn = document.querySelector(".play-btn");
+    function seekByClick(e) {
+      const player = document.getElementById("player");
+      if (!player.duration) return;
 
-    if (player.paused) {
-      player.play();
-      btn.textContent = "⏸";
-    } else {
-      player.pause();
-      btn.textContent = "▶";
+      const bar = e.currentTarget;
+      const rect = bar.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      player.currentTime = percent * player.duration;
     }
-  }
 
-  function playNext() {
-    if (currentPlaylist.length === 0) return;
+    function setVolume(e) {
+      const player = document.getElementById("player");
+      const slider = e.currentTarget;
+      const fill = document.getElementById("volume-fill");
+      const rect = slider.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
 
-    // Move to next track, loop back to start if at end
-    currentTrackIndex = (currentTrackIndex + 1) % currentPlaylist.length;
-    const nextSong = currentPlaylist[currentTrackIndex];
-    playSong(nextSong.id, nextSong.name);
-  }
+      player.volume = Math.max(0, Math.min(1, percent));
+      fill.style.width = (percent * 100) + "%";
+    }
 
-  function playPrevious() {
-    if (currentPlaylist.length === 0) return;
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return "0:00";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
 
-    // Move to previous track, loop to end if at start
-    currentTrackIndex = (currentTrackIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-    const prevSong = currentPlaylist[currentTrackIndex];
-    playSong(prevSong.id, prevSong.name);
-  }
+    /* ================= SEARCH ================= */
+    function handleSearch(query) {
+      // Debounce search
+      clearTimeout(searchTimeout);
 
-  function updateProgress() {
-    const player = document.getElementById("player");
-    const fill = document.getElementById("progress-fill");
-    const currentTime = document.getElementById("current-time");
-    const totalTime = document.getElementById("total-time");
+      searchTimeout = setTimeout(() => {
+        const searchTerm = query.toLowerCase().trim();
 
-    if (!player.duration) return;
-
-    const percent = (player.currentTime / player.duration) * 100;
-    fill.style.width = percent + "%";
-
-    currentTime.textContent = formatTime(player.currentTime);
-    totalTime.textContent = formatTime(player.duration);
-
-    // Trigger prefetch for the next track when within threshold
-    try {
-      const remaining = player.duration - player.currentTime;
-      if (remaining <= PREFETCH_THRESHOLD && currentPlaylist && currentPlaylist.length > 0) {
-        const nextIndex = (currentTrackIndex + 1) % currentPlaylist.length;
-        const nextSong = currentPlaylist[nextIndex];
-        if (nextSong && !preloadedTracks[nextSong.id] && !prefetchControllers[nextSong.id]) {
-          console.debug('updateProgress: prefetching next song', { nextId: nextSong.id, remaining });
-          prefetchNextTrack(nextSong.id, nextSong.name, nextSong.mimeType);
+        if (searchTerm === "") {
+          // Show all items if search is empty
+          displayItems(allItems);
+          return;
         }
+
+        // Filter items by name
+        const filteredItems = allItems.filter(item =>
+          item.name.toLowerCase().includes(searchTerm)
+        );
+
+        displayItems(filteredItems);
+      }, 300); // Wait 300ms after user stops typing
+    }
+
+    /* ================= NAVIGATION ================= */
+    function goBack() {
+      if (folderStack.length === 0) return;
+
+      const prev = folderStack.pop();
+
+      // If returning to root, load root folders; otherwise load previous folder without pushing history
+      if (prev.id === ROOT_MUSIC_FOLDER_ID) {
+        loadRootFolders();
+      } else {
+        loadFolder(prev.id, prev.name, false);
       }
-    } catch (e) { console.debug('updateProgress prefetch check failed', e); }
-  }
 
-  function seekByClick(e) {
-    const player = document.getElementById("player");
-    if (!player.duration) return;
+      updateBreadcrumb();
+    }
 
-    const bar = e.currentTarget;
-    const rect = bar.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    player.currentTime = percent * player.duration;
-  }
-
-  function setVolume(e) {
-    const player = document.getElementById("player");
-    const slider = e.currentTarget;
-    const fill = document.getElementById("volume-fill");
-    const rect = slider.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-
-    player.volume = Math.max(0, Math.min(1, percent));
-    fill.style.width = (percent * 100) + "%";
-  }
-
-  function formatTime(seconds) {
-    if (isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  /* ================= SEARCH ================= */
-  function handleSearch(query) {
-    // Debounce search
-    clearTimeout(searchTimeout);
-
-    searchTimeout = setTimeout(() => {
-      const searchTerm = query.toLowerCase().trim();
-
-      if (searchTerm === "") {
-        // Show all items if search is empty
-        displayItems(allItems);
+    function updateBreadcrumb() {
+      const crumb = document.getElementById("breadcrumb");
+      if (folderStack.length === 0) {
+        crumb.textContent = "Music Library";
         return;
       }
-
-      // Filter items by name
-      const filteredItems = allItems.filter(item =>
-        item.name.toLowerCase().includes(searchTerm)
-      );
-
-      displayItems(filteredItems);
-    }, 300); // Wait 300ms after user stops typing
-  }
-
-  /* ================= NAVIGATION ================= */
-  function goBack() {
-    if (folderStack.length === 0) return;
-
-    const prev = folderStack.pop();
-
-    // If returning to root, load root folders; otherwise load previous folder without pushing history
-    if (prev.id === ROOT_MUSIC_FOLDER_ID) {
-      loadRootFolders();
-    } else {
-      loadFolder(prev.id, prev.name, false);
+      crumb.textContent = ["Music Library", ...folderStack.map(f => f.name)].join(" › ");
     }
 
-    updateBreadcrumb();
-  }
+    // Expose handlers to the global scope
+    window.login = login;
+    window.goBack = goBack;
+    window.playSong = playSong;
+    window.shuffleFolder = shuffleFolder;
+    window.shuffleCurrentFolder = shuffleCurrentFolder;
 
-  function updateBreadcrumb() {
-    const crumb = document.getElementById("breadcrumb");
-    if (folderStack.length === 0) {
-      crumb.textContent = "Music Library";
-      return;
-    }
-    crumb.textContent = ["Music Library", ...folderStack.map(f => f.name)].join(" › ");
-  }
+    // Attach event listeners to elements now that functions are defined
+    const _loginBtn = document.getElementById('login-btn');
+    if (_loginBtn) _loginBtn.addEventListener('click', () => login());
 
-  // Expose handlers to the global scope
-  window.login = login;
-  window.goBack = goBack;
-  window.playSong = playSong;
-  window.shuffleFolder = shuffleFolder;
-  window.shuffleCurrentFolder = shuffleCurrentFolder;
+    // Initialize volume
+    document.getElementById("player").volume = 1;
+  </script>
 
-  // Attach event listeners to elements now that functions are defined
-  const _loginBtn = document.getElementById('login-btn');
-  if (_loginBtn) _loginBtn.addEventListener('click', () => login());
-
-  // Initialize volume
-  document.getElementById("player").volume = 1;
-</script>
-
-<!-- mp4box.js (used to build MP4 init segments from head+tail when needed) -->
-<script>
-  // Robust loader for mp4box with multiple CDN fallbacks and user notification
-  (function(){
-    const urls = [
-      'https://cdn.jsdelivr.net/npm/mp4box/dist/mp4box.all.min.js',
-      'https://unpkg.com/mp4box/dist/mp4box.all.min.js',
-      'https://cdn.jsdelivr.net/npm/mp4box@0.4.2/dist/mp4box.all.min.js'
-    ];
-    function loadScript(src){
-      return new Promise((resolve,reject)=>{
-        const s = document.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = () => resolve(src);
-        s.onerror = () => { s.remove(); reject(new Error('Failed to load ' + src)); };
-        document.head.appendChild(s);
-      });
-    }
-    (async function tryLoad(){
-      for (const u of urls) {
-        try {
-          await loadScript(u);
-          console.debug('mp4box loaded from', u);
-          try { showMessage('mp4box successfully loaded', false, 2500); } catch(e) { console.debug('mp4box loaded (no UI)'); }
-          document.dispatchEvent(new Event('mp4box-loaded'));
-          return;
-        } catch (err) {
-          console.debug('mp4box load failed for', u, err);
-        }
+  <!-- mp4box.js (used to build MP4 init segments from head+tail when needed) -->
+  <script>
+    // Robust loader for mp4box with multiple CDN fallbacks and user notification
+    (function () {
+      const urls = [
+        'https://cdn.jsdelivr.net/npm/mp4box/dist/mp4box.all.min.js',
+        'https://unpkg.com/mp4box/dist/mp4box.all.min.js',
+        'https://cdn.jsdelivr.net/npm/mp4box@0.4.2/dist/mp4box.all.min.js'
+      ];
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = src;
+          s.async = true;
+          s.onload = () => resolve(src);
+          s.onerror = () => { s.remove(); reject(new Error('Failed to load ' + src)); };
+          document.head.appendChild(s);
+        });
       }
-      console.warn('mp4box failed to load from all CDNs — falling back to simple concat method');
-      try { showMessage('Warning: mp4box failed to load; some files may not stream correctly.', true, 8000); } catch(e) {}
+      (async function tryLoad() {
+        for (const u of urls) {
+          try {
+            await loadScript(u);
+            console.debug('mp4box loaded from', u);
+            try { showMessage('mp4box successfully loaded', false, 2500); } catch (e) { console.debug('mp4box loaded (no UI)'); }
+            document.dispatchEvent(new Event('mp4box-loaded'));
+            return;
+          } catch (err) {
+            console.debug('mp4box load failed for', u, err);
+          }
+        }
+        console.warn('mp4box failed to load from all CDNs — falling back to simple concat method');
+        try { showMessage('Warning: mp4box failed to load; some files may not stream correctly.', true, 8000); } catch (e) { }
+      })();
     })();
-  })();
-</script>
+  </script>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
+
 </html>
