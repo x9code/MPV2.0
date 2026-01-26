@@ -82,19 +82,36 @@
       </div>
 
       <div class="player-controls">
-        <button class="control-btn" onclick="playPrevious()">
+        <button class="control-btn shuffle-btn" id="player-shuffle-btn" onclick="toggleShuffleMode()" title="Shuffle">
           <svg viewBox="0 0 24 24">
-            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+            <path
+              d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
           </svg>
         </button>
-        <button class="control-btn play-btn" onclick="togglePlay()">
-          <svg viewBox="0 0 24 24" id="play-icon-svg">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </button>
-        <button class="control-btn" onclick="playNext()">
+
+        <div class="controls-main">
+          <button class="control-btn" onclick="playPrevious()">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+            </svg>
+          </button>
+
+          <button class="control-btn play-btn" onclick="togglePlay()">
+            <svg viewBox="0 0 24 24" id="play-icon-svg">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+
+          <button class="control-btn" onclick="playNext()">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+            </svg>
+          </button>
+        </div>
+
+        <button class="control-btn repeat-btn" id="player-repeat-btn" onclick="toggleRepeatMode()" title="Repeat">
           <svg viewBox="0 0 24 24">
-            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+            <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v6z" />
           </svg>
         </button>
 
@@ -105,20 +122,19 @@
           </div>
           <span class="time-display" id="total-time">0:00</span>
         </div>
-
-        <button id="player-shuffle-btn" class="control-btn shuffle-btn" title="Toggle Shuffle"
-          onclick="toggleShuffleMode()" aria-label="Toggle Shuffle">
-          <svg viewBox="0 0 24 24">
-            <path
-              d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
-          </svg>
-        </button>
+        <!-- Volume hidden on mobile/compact -->
+        <div class="volume-container">
+          <div class="volume-slider" onclick="setVolume(event)">
+            <div class="volume-fill" id="volume-fill" style="width: 100%"></div>
+          </div>
+        </div>
       </div>
     </div>
     <audio id="player"></audio>
   </div>
 
   <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 

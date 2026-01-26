@@ -696,16 +696,33 @@ function displayItems(items) {
             textDiv.className = 'item-text';
 
             // Clean filename: remove extension and artist info if present
-            let displayName = item.name.replace(/\.[^/.]+$/, ""); // remove extension
-            // Heuristic context: User screenshot shows "Song Name - Artist" format.
-            // We want to keep only "Song Name".
-            if (item.mimeType.startsWith('audio/') && displayName.includes('-')) {
-                const parts = displayName.split('-');
-                if (parts.length > 0) {
-                    displayName = parts[0].trim();
-                }
+            // Clean filename: remove extension
+            let baseName = item.name.replace(/\.[^/.]+$/, "");
+
+            if (item.mimeType.startsWith('audio/')) {
+                const meta = parseMetadata(item.name);
+                let displayTitle = meta.title;
+                let displayArtist = meta.artist;
+
+                // Clear textContent and use structured divs
+                textDiv.innerHTML = '';
+
+                const titleEl = document.createElement('div');
+                titleEl.className = 'song-title';
+                titleEl.textContent = displayTitle;
+                textDiv.appendChild(titleEl);
+
+                const artistEl = document.createElement('div');
+                artistEl.className = 'song-artist';
+                artistEl.textContent = displayArtist;
+                textDiv.appendChild(artistEl);
+
+                // Asynchronously fetch real metadata
+                updateItemMetadata(item.id, titleEl, artistEl);
+            } else {
+                // Folders and others
+                textDiv.textContent = baseName;
             }
-            textDiv.textContent = displayName;
 
 
             // Custom SVG definitions
@@ -1040,6 +1057,9 @@ async function playSong(fileId, fileName) {
             currentAudioUrl = pre.fullBlobUrl;
             player.src = currentAudioUrl;
             try { delete preloadedTracks[fileId]; } catch (e) { }
+
+            // Attempt to update metadata from the blob URL
+            updatePlayerMetadata(currentAudioUrl);
         } else {
             // 4. Force Full Download (User Request)
             // Always download the full file blob before playing
@@ -1059,19 +1079,9 @@ async function playSong(fileId, fileName) {
     }
 
     function finalizePlaybackSetup() {
-        let displayTitle = fileName.replace(/\.[^/.]+$/, "");
-        let displayArtist = "Unknown Artist";
-
-        if (displayTitle.includes('-')) {
-            const parts = displayTitle.split('-');
-            if (parts.length > 0) {
-                displayTitle = parts[0].trim();
-                // If there's a second part, assume it's the artist
-                if (parts.length > 1) {
-                    displayArtist = parts[1].trim();
-                }
-            }
-        }
+        const meta = parseMetadata(fileName);
+        displayTitle = meta.title;
+        displayArtist = meta.artist;
         document.getElementById("track-title").textContent = displayTitle;
         const artistEl = document.querySelector(".track-artist");
         if (artistEl) artistEl.textContent = displayArtist;
@@ -1111,6 +1121,9 @@ async function playSong(fileId, fileName) {
             if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
             currentAudioUrl = URL.createObjectURL(blob);
             player.src = currentAudioUrl;
+
+            // Attempt to read ID3 tags from the blob
+            updatePlayerMetadata(blob);
 
             // Finalize setup now that we have the src
             finalizePlaybackSetup();
@@ -1213,6 +1226,19 @@ function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Helper: Parse filename with heuristics
+function parseMetadata(fileName) {
+    // Don't guess. Just return filename as title and Unknown Artist until metadata loads.
+    let baseName = fileName.replace(/\.[^/.]+$/, ""); // remove extension
+    let title = baseName;
+    let artist = ""; // User prefers empty/unknown rather than wrong guess
+
+    // Original rigorous parsing logic removed to avoid "guessing" errors.
+    // The asynchronous updateItemMetadata function will populate the true tags locally.
+
+    return { title, artist };
 }
 
 /* ================= SEARCH ================= */
@@ -1375,3 +1401,92 @@ document.getElementById("player").volume = 1;
         }
     }
 })();
+
+// Helper to fetch first 128KB of file for metadata (ID3 tags usually at start)
+async function fetchPartialMetadata(fileId) {
+    try {
+        const token = await getAccessToken();
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+        const res = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Range': 'bytes=0-524288' // 512KB to ensure we get tags even with art
+            }
+        });
+        if (!res.ok) throw new Error(res.status);
+        return await res.blob();
+    } catch (e) {
+        console.warn('Partial fetch failed', e);
+        return null; // Fallback
+    }
+}
+
+// Function to update item UI with real metadata
+async function updateItemMetadata(fileId, titleEl, artistEl) {
+    const blob = await fetchPartialMetadata(fileId);
+    if (!blob) return;
+
+    try {
+        const tag = await readTags(blob);
+        if (tag && tag.tags) {
+            if (tag.tags.title) titleEl.textContent = tag.tags.title;
+            if (tag.tags.artist) artistEl.textContent = tag.tags.artist;
+        }
+    } catch (e) {
+        // Tag reading failed, keep filename defaults
+        console.debug('No tags found for', fileId);
+    }
+}
+
+// Helper to read ID3 tags from a Blob or URL
+function readTags(blobOrUrl) {
+    return new Promise((resolve, reject) => {
+        if (!window.jsmediatags) {
+            reject(new Error("jsmediatags not loaded"));
+            return;
+        }
+        jsmediatags.read(blobOrUrl, {
+            onSuccess: function (tag) {
+                resolve(tag);
+            },
+            onError: function (error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+// Update player metadata from tags
+async function updatePlayerMetadata(blob) {
+    try {
+        const tag = await readTags(blob);
+        if (tag && tag.tags) {
+            const { title, artist, picture } = tag.tags;
+
+            // Update Text
+            if (title) document.getElementById("track-title").textContent = title;
+            if (artist) {
+                const artistEl = document.querySelector(".track-artist");
+                if (artistEl) artistEl.textContent = artist;
+            }
+
+            // Update Album Art if embedded
+            if (picture) {
+                const { data, format } = picture;
+                let base64String = "";
+                for (let i = 0; i < data.length; i++) {
+                    base64String += String.fromCharCode(data[i]);
+                }
+                const url = `data:${format};base64,${window.btoa(base64String)}`;
+
+                // Update player art
+                const alArt = document.querySelector('.album-art');
+                if (alArt) {
+                    alArt.innerHTML = `<img src="${url}" alt="Album Art" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Failed to read ID3 tags", e);
+    }
+}
