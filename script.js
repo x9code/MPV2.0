@@ -1492,6 +1492,23 @@ function toggleRepeatMode() {
 
 window.toggleRepeatMode = toggleRepeatMode;
 
+// Expanded Player Logic
+function togglePlayerExpansion(event) {
+    if (event) {
+        // If clicking a button or slider, don't toggle expansion
+        if (event.target.closest('button') || event.target.closest('input') || event.target.closest('.volume-slider') || event.target.closest('.progress-bar')) {
+            if (!event.target.closest('.collapse-btn')) { // Exception for collapse btn
+                return;
+            }
+        }
+        event.stopPropagation();
+    }
+
+    const playerBar = document.getElementById("bottom-player");
+    playerBar.classList.toggle("expanded");
+}
+window.togglePlayerExpansion = togglePlayerExpansion;
+
 // Update player metadata from tags
 async function updatePlayerMetadata(blob) {
     try {

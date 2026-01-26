@@ -71,7 +71,13 @@
     </div>
   </div>
 
-  <div id="bottom-player">
+  <div id="bottom-player" onclick="togglePlayerExpansion(event)">
+    <!-- Collapse Button -->
+    <button class="collapse-btn" onclick="togglePlayerExpansion(event)">
+      <svg viewBox="0 0 24 24">
+        <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" transform="rotate(180 12 12)" />
+      </svg>
+    </button>
     <div class="player-container">
       <div class="player-info">
         <div class="album-art">🎵</div>
