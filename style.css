@@ -953,6 +953,36 @@
         color: #fff;
     }
 
+    /* Repeat Button Active States */
+    .control-btn.active {
+        color: #FF9800;
+        /* Orange color when active */
+        background: rgba(255, 152, 0, 0.1);
+    }
+
+    /* Repeat One Badge Overlay */
+    .control-btn.repeat-one {
+        position: relative;
+    }
+
+    .control-btn.repeat-one::after {
+        content: '1';
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 8px;
+        font-weight: bold;
+        background: #FF9800;
+        color: #000;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
     .form-group {
         margin-bottom: 20px;
     }

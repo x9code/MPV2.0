@@ -1088,10 +1088,22 @@ async function playSong(fileId, fileName) {
         setDefaultAlbumArt();
         player.ontimeupdate = updateProgress;
         player.onended = () => {
-            // icon: Play
-            const playIcon = document.querySelector("#play-icon-svg path");
-            if (playIcon) playIcon.setAttribute("d", "M8 5v14l11-7z");
-            playNext();
+            // Check Repeat Mode
+            if (repeatMode === 2) {
+                // Repeat One
+                player.currentTime = 0;
+                player.play();
+            } else {
+                // Repeat All (1) or Off (0) -> behave the same here (playNext handles wrapping or stopping)
+                // But typically Off should stop at the end of the playlist.
+                // playNext() in this app currently wraps, so 0 acts like 1.
+                // For now, let's keep it simple: both call playNext().
+                // If the user wants specific "Stop at end" logic, we can add it later.
+                // icon: Play (reset icon if stopping, but playNext changes it)
+                const playIcon = document.querySelector("#play-icon-svg path");
+                if (playIcon) playIcon.setAttribute("d", "M8 5v14l11-7z");
+                playNext();
+            }
         };
         player.onerror = (e) => {
             console.error("Playback error", player.error);
@@ -1455,6 +1467,30 @@ function readTags(blobOrUrl) {
         });
     });
 }
+
+// Repeat Mode Logic
+let repeatMode = 0; // 0: Off, 1: All, 2: One
+
+function toggleRepeatMode() {
+    repeatMode = (repeatMode + 1) % 3;
+    const btn = document.getElementById("player-repeat-btn");
+
+    // Reset classes
+    btn.classList.remove("active", "repeat-one");
+
+    let msg = "Repeat Off";
+    if (repeatMode === 1) {
+        msg = "Repeat All";
+        btn.classList.add("active");
+    } else if (repeatMode === 2) {
+        msg = "Repeat One";
+        btn.classList.add("active", "repeat-one");
+    }
+
+    try { showMessage(msg, false, 1500); } catch (e) { console.log(msg); }
+}
+
+window.toggleRepeatMode = toggleRepeatMode;
 
 // Update player metadata from tags
 async function updatePlayerMetadata(blob) {
